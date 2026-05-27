@@ -7,26 +7,119 @@
 
 import SwiftUI
 
+enum NunitoFont: String {
+
+    case black = "Nunito-Black"
+
+    case bold = "Nunito-Bold"
+
+    case extraBold = "Nunito-ExtraBold"
+
+    case italic = "Nunito-Italic"
+
+    case light = "Nunito-Light"
+
+    case medium = "Nunito-Medium"
+
+    case regular = "Nunito-Regular"
+
+    case semiBold = "Nunito-SemiBold"
+}
+
 extension Font {
 
+    // Base Helper
+    static func nunito(
+        _ font: NunitoFont,
+        size: CGFloat
+    ) -> Font {
+
+        .custom(font.rawValue, size: size)
+    }
+
     // MARK: - Display
-    static let display = Font.custom("Nunito-Black", size: 42)
+    static func display(
+        weight: NunitoFont = .black,
+        size: CGFloat = 42
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
 
     // MARK: - Heading
-    static let heading1 = Font.custom("Nunito-Black", size: 28)
+    static func heading1(
+        weight: NunitoFont = .black,
+        size: CGFloat = 28
+    ) -> Font {
 
-    static let heading2 = Font.custom("Nunito-ExtraBold", size: 22)
+        .nunito(weight, size: size)
+    }
 
-    static let heading3 = Font.custom("Nunito-ExtraBold", size: 18)
+    static func heading2(
+        weight: NunitoFont = .extraBold,
+        size: CGFloat = 22
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
+
+    static func heading3(
+        weight: NunitoFont = .extraBold,
+        size: CGFloat = 18
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
 
     // MARK: - Body
-    static let bodyLarge = Font.custom("Nunito-SemiBold", size: 16)
+    static func bodyLarge(
+        weight: NunitoFont = .semiBold,
+        size: CGFloat = 16
+    ) -> Font {
 
-    static let bodySmall = Font.custom("Nunito-SemiBold", size: 14)
+        .nunito(weight, size: size)
+    }
+
+    static func bodyMedium(
+        weight: NunitoFont = .regular,
+        size: CGFloat = 15
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
+
+    static func bodySmall(
+        weight: NunitoFont = .semiBold,
+        size: CGFloat = 14
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
 
     // MARK: - Label
-    static let label = Font.custom("Nunito-Bold", size: 12)
+    static func label(
+        weight: NunitoFont = .bold,
+        size: CGFloat = 12
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
 
     // MARK: - Button
-    static let button = Font.custom("Nunito-ExtraBold", size: 17)
+    static func button(
+        weight: NunitoFont = .extraBold,
+        size: CGFloat = 17
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
+
+    // MARK: - Caption
+    static func caption(
+        weight: NunitoFont = .medium,
+        size: CGFloat = 11
+    ) -> Font {
+
+        .nunito(weight, size: size)
+    }
 }
