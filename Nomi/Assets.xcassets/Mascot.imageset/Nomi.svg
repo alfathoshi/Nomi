@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="150px" height="149px" viewBox="0 0 150 149" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Mascot/Nomi</title>
+    <g id="Mascot/Nomi" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <g id="Group" transform="translate(23, 0)">
+            <circle id="Oval" fill="#B39DDB" cx="52" cy="84" r="52"></circle>
+            <circle id="Oval" fill="#C5B0E8" cx="52" cy="74" r="46"></circle>
+            <ellipse id="Oval" fill="#D4C0F0" cx="52" cy="72" rx="38" ry="36"></ellipse>
+            <circle id="Oval" fill="#FFFFFF" opacity="0.9" cx="34" cy="65" r="8"></circle>
+            <circle id="Oval" fill="#FFFFFF" opacity="0.9" cx="70" cy="65" r="8"></circle>
+            <circle id="Oval" fill="#4A2080" cx="36" cy="67" r="5"></circle>
+            <circle id="Oval" fill="#4A2080" cx="72" cy="67" r="5"></circle>
+            <circle id="Oval" fill="#FFFFFF" cx="38" cy="65" r="2"></circle>
+            <circle id="Oval" fill="#FFFFFF" cx="74" cy="65" r="2"></circle>
+            <ellipse id="Oval" fill="#F48FB1" opacity="0.5" cx="29" cy="77" rx="8" ry="5"></ellipse>
+            <ellipse id="Oval" fill="#F48FB1" opacity="0.5" cx="75" cy="77" rx="8" ry="5"></ellipse>
+            <path d="M40,84 C48,91.3333333 56,91.3333333 64,84" id="Path" stroke="#4A2080" stroke-width="2.5" stroke-linecap="round"></path>
+            <line x1="44" y1="27" x2="40" y2="7" id="Path" stroke="#B39DDB" stroke-width="3" fill="#000000" stroke-linecap="round"></line>
+            <line x1="60" y1="27" x2="64" y2="7" id="Path" stroke="#B39DDB" stroke-width="3" fill="#000000" stroke-linecap="round"></line>
+            <circle id="Oval" fill="#9575CD" cx="40" cy="5" r="5"></circle>
+            <circle id="Oval" fill="#9575CD" cx="64" cy="5" r="5"></circle>
+            <rect id="Rectangle" fill="#FF9800" x="26" y="107" width="52" height="32" rx="16"></rect>
+            <rect id="Rectangle" fill="#FFB74D" x="30" y="107" width="44" height="18" rx="9"></rect>
+            <rect id="Rectangle" fill="#E65100" opacity="0.5" x="38" y="115" width="8" height="6" rx="3"></rect>
+            <rect id="Rectangle" fill="#E65100" opacity="0.5" x="58" y="115" width="8" height="6" rx="3"></rect>
+            <ellipse id="Oval" fill="#9C27B0" opacity="0.6" cx="52" cy="139" rx="6" ry="4"></ellipse>
+            <ellipse id="Oval" fill="#FF9800" transform="translate(30, 127) rotate(-30) translate(-30, -127)" cx="30" cy="127" rx="14" ry="8"></ellipse>
+            <ellipse id="Oval" fill="#FF9800" transform="translate(74, 121) rotate(30) translate(-74, -121)" cx="74" cy="121" rx="14" ry="8"></ellipse>
+            <ellipse id="Oval" fill="#CE93D8" cx="44" cy="141" rx="7" ry="9"></ellipse>
+            <ellipse id="Oval" fill="#CE93D8" cx="60" cy="141" rx="7" ry="9"></ellipse>
+        </g>
+    </g>
+</svg>
