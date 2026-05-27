@@ -23,6 +23,7 @@ extension Color {
     // MARK: - Surface
     static let nomiSurface = Color("Surface")
     static let nomiSurfaceTint = Color("SurfaceTint")
+    static let nomiSurfaceAccent = Color("SurfaceAccent")
     
     // MARK: - Text
     static let nomiTextPrimary = Color("TextPrimary")
