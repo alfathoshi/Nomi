@@ -4,9 +4,14 @@
 <dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string></string>
-		<string></string>
-		<string></string>
+		<string>Nunito-Regular.ttf</string>
+		<string>Nunito-Medium.ttf</string>
+		<string>Nunito-SemiBold.ttf</string>
+		<string>Nunito-Bold.ttf</string>
+		<string>Nunito-Black.ttf</string>
+		<string>Nunito-ExtraBold.ttf</string>
+		<string>Nunito-Italic.ttf</string>
+		<string>Nunito-Light.ttf</string>
 	</array>
 </dict>
 </plist>
