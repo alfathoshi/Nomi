@@ -186,6 +186,7 @@ struct ParentDashboardView: View {
                 .padding(.top, 20)
             }
             .scrollIndicators(.hidden)
+            .navigationBarBackButtonHidden(true)
         }
     }
 }
