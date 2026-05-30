@@ -12,6 +12,7 @@ struct ParentDashboardView: View {
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10)
     ]
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -29,7 +30,9 @@ struct ParentDashboardView: View {
                             rightIcon: "arrow.right",
                             foregroundColor: .nomiTextSecondary,
                             backgroundColor: Color.gray.opacity(0.2),
-                        )
+                        ) {
+                            dismiss()
+                        }
                         
                     }
                     

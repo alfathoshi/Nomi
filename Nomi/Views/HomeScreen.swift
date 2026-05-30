@@ -30,7 +30,7 @@ struct HomeScreen: View {
                                 
                             }
                             Spacer()
-                            NavigationLink( destination: ParentDashboardView()) {
+                            NavigationLink( destination: ParentZoneView()) {
                                 Image(systemName: "person.fill")
                                     .font(.system(size: 22))
                                     .foregroundStyle(.white)

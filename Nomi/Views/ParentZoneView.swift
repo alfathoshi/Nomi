@@ -13,7 +13,8 @@ struct ParentZoneView: View {
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10),
     ]
-    @State private var selectedPad: String?
+    @Environment(\.dismiss) private var dismiss
+    @State private var service = ParentZoneViewModel()
     var body: some View {
         NavigationStack {
             VStack {
@@ -31,9 +32,13 @@ struct ParentZoneView: View {
                     .padding(.bottom, 20)
                 
                 HStack {
-                    ForEach(0..<4, id: \.self) { _ in
+                    ForEach(0..<4, id: \.self) { index in
                         Circle()
-                            .fill(Color.nomiPrimary)
+                            .fill(
+                                index < service.enteredPin.count
+                                ? Color.nomiPrimary
+                                : .gray.opacity(0.2)
+                            )
                             .frame(width: 18, height: 18)
                     }
                 }
@@ -43,33 +48,68 @@ struct ParentZoneView: View {
                     columns: columns,
                     spacing: 10
                 ) {
-                    KeypadButton(value: "1", selectedPad: $selectedPad)
-                    KeypadButton(value: "2", label: "ABC", selectedPad: $selectedPad)
-                    KeypadButton(value: "3", label: "DEF", selectedPad: $selectedPad)
-                    KeypadButton(value: "4", label: "GHI", selectedPad: $selectedPad)
-                    KeypadButton(value: "5", label: "JKL", selectedPad: $selectedPad)
-                    KeypadButton(value: "6", label: "MNO", selectedPad: $selectedPad)
-                    KeypadButton(value: "7", label: "PQRS", selectedPad: $selectedPad)
-                    KeypadButton(value: "8", label: "TUV", selectedPad: $selectedPad)
-                    KeypadButton(value: "9", label: "WXYZ", selectedPad: $selectedPad)
-                    KeypadButton(value: "👆", selectedPad: $selectedPad)
-                    KeypadButton(value: "0", selectedPad: $selectedPad)
-                    Image(systemName: "delete.left")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24)
+                    KeypadButton(value: "1") {
+                        service.handleDigit("1")
+                    }
+                    KeypadButton(value: "2") {
+                        service.handleDigit("2")
+                    }
+                    KeypadButton(value: "3") {
+                        service.handleDigit("3")
+                    }
+                    KeypadButton(value: "4") {
+                        service.handleDigit("4")
+                    }
+                    KeypadButton(value: "5") {
+                        service.handleDigit("5")
+                    }
+                    KeypadButton(value: "6") {
+                        service.handleDigit("6")
+                    }
+                    KeypadButton(value: "7") {
+                        service.handleDigit("7")
+                    }
+                    KeypadButton(value: "8") {
+                        service.handleDigit("8")
+                    }
+                    KeypadButton(value: "9") {
+                        service.handleDigit("9")
+                    }
+                    KeypadButton(value: "👆") {
+                        service.validatePin()
+                    }
+                    .navigationDestination(
+                        isPresented: $service.isAuthenticated
+                    ) {
+                        ParentDashboardView()
+                    }
+                    KeypadButton(value: "0") {
+                        service.handleDigit("0")
+                    }
+                    
+                    Button {
+                        if !service.enteredPin.isEmpty {
+                            service.enteredPin.removeLast()
+                        }
+                    } label: {
+                        Image(systemName: "delete.left")
+                            .font(.heading1())
+                            .foregroundColor(.nomiTextPrimary)
+                    }
                 }
                 .padding(.bottom, 32)
                 
-                HStack {
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.nomiPrimary)
-                    Text("Back to Child Zone")
+                Button {
+                    dismiss()
+                } label: {
+                    Label("Back to Child Zone", systemImage: "arrow.left")
                         .font(.button())
-                        .foregroundColor(.nomiPrimary)
                         .underline()
+                        .foregroundStyle(Color.nomiPrimary)
                 }
+                .buttonStyle(.plain)
             }
+            .navigationBarBackButtonHidden(true)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.horizontal, 20)
             .padding(.top, 40)
