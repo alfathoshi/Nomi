@@ -10,25 +10,36 @@ import SwiftUI
 struct LevelBadge: View {
     let level: Int
     let title: String
+    var pointerUp: Bool = true
 
     var body: some View {
-        VStack(spacing: 2) {
-            Text("Level \(level)")
-                .font(.label())
-            Text(title)
-                .font(.label())
-        }
-        .foregroundColor(.white)
-        .padding(.horizontal, 32)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 60)
+        ZStack {
+            LevelBadgeShape()
                 .fill(Color.nomiPrimary)
-        )
+                .scaleEffect(y: pointerUp ? 1 : -1)   // flip shape kalau pointer ke bawah
+
+            VStack(spacing: 2) {
+                Text("Level \(level)")
+                Text(title)
+            }
+            .font(.bodySmall(weight: .bold))
+            .foregroundColor(.white)
+            .multilineTextAlignment(.center)
+            // Padding swap berdasarkan arah pointer
+            .padding(.top, pointerUp ? 22 : 8)
+            .padding(.bottom, pointerUp ? 8 : 22)
+            .padding(.horizontal, 24)
+        }
+        .fixedSize()
     }
 }
 
+#Preview("Pointer Up (badge BELOW node)") {
+    LevelBadge(level: 1, title: "My Body", pointerUp: true)
+        .padding()
+}
 
-#Preview {
-    LevelBadge(level: 1, title: "My Body")
+#Preview("Pointer Down (badge ABOVE node)") {
+    LevelBadge(level: 4, title: "What to do if unsafe", pointerUp: false)
+        .padding()
 }

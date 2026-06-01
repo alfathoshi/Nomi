@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="104px" height="50px" viewBox="0 0 104 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>My Body</title>
+    <defs>
+        <path d="M19.2,0 L64.8,0 C71.5206301,0 74.8809451,0 77.447886,1.30792171 C81.4685233,3.35653872 84,7.48753331 84,12 C84,16.5124667 81.4685233,20.6434613 77.447886,22.6920783 C74.8809451,24 71.5206301,24 64.8,24 L19.2,24 C12.4793699,24 9.11905489,24 6.552114,22.6920783 C2.53147674,20.6434613 0,16.5124667 0,12 C0,7.48753331 2.53147674,3.35653872 6.552114,1.30792171 C9.11905489,0 12.4793699,0 19.2,0 Z" id="path-1"></path>
+        <filter x="-19.6%" y="-56.2%" width="139.3%" height="237.5%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.545098039   0 0 0 0 0.360784314   0 0 0 0 0.964705882  0 0 0 0.35 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Prototype" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="My-Body" transform="translate(10, 0)">
+            <g id="Continue-Button" transform="translate(0, 13)" xlink:href="#path-1">
+                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <use fill="#7C3AED" fill-rule="evenodd" xlink:href="#path-1"></use>
+            </g>
+            <path d="M68.6937269,13 L68.3756827,13 L66.9435424,13 L62.6442989,13 C59.7781365,13 58.0580627,12.727 56.7689483,12.179 C55.478893,11.632 54.619797,10.811 53.4737085,9.716 C52.326679,8.621 51.1805904,7.389 50.0345018,6.089 C48.8884133,4.789 47.7423247,3.421 46.5943542,2.052 C45.4482657,0.684 43.8985055,0 42.3468635,0 C40.7952214,0 39.2454613,0.684 38.0993727,2.052 C36.9514022,3.421 35.8053137,4.789 34.6592251,6.089 C33.5131365,7.389 32.367048,8.621 31.2200185,9.716 C30.0739299,10.811 29.2148339,11.632 27.9247786,12.179 C26.6356642,12.727 24.9155904,13 22.049428,13 L17.7501845,13 L16.3180443,13 L16,13 L68.6937269,13 Z" id="Cartouche-Copy" fill="#7C3AED"></path>
+        </g>
+    </g>
+</svg>

@@ -13,9 +13,15 @@ enum NodeState {
     case locked
 }
 
+enum BadgePosition {
+    case above
+    case below
+}
+
 struct LevelLabelInfo {
     let level: Int
     let title: String
+    var position: BadgePosition = .below
 }
 
 struct RoadmapNodeData {
@@ -23,19 +29,46 @@ struct RoadmapNodeData {
     let y: Double
     let state: NodeState
     var levelLabel: LevelLabelInfo? = nil
+    var icon: String = "level1Bg"
 }
 
 struct RoadmapScreen: View {
     let nodes: [RoadmapNodeData] = [
-        RoadmapNodeData(x: 0.78, y: 0.20, state: .completed),
-        RoadmapNodeData(x: 0.40, y: 0.35, state: .completed),
-        RoadmapNodeData(x: 0.70, y: 0.52, state: .completed),
-        RoadmapNodeData(x: 0.78, y: 0.75, state: .current),
+        RoadmapNodeData(
+            x: 0.78,
+            y: 0.20,
+            state: .completed,
+            levelLabel: LevelLabelInfo(level: 5, title: "Final Quiz", position: .above),
+            icon: "level1Bg",
+        ),
+        RoadmapNodeData(
+            x: 0.40,
+            y: 0.35,
+            state: .completed,
+            levelLabel: LevelLabelInfo(level: 4, title: "What to do if unsafe", position: .above),
+            icon: "level1Bg",
+        ),
+        RoadmapNodeData(
+            x: 0.70,
+            y: 0.52,
+            state: .completed,
+            levelLabel: LevelLabelInfo(level: 3, title: "Safe Touch", position: .above),
+            icon: "level1Bg",
+        ),
+        RoadmapNodeData(
+            x: 0.78,
+            y: 0.75,
+            state: .current,
+            levelLabel: LevelLabelInfo(level: 2, title: "Private Parts", position: .above),
+            icon: "currentLevelBg",
+        ),
         RoadmapNodeData(
             x: 0.40,
             y: 0.88,
-            state: .locked,
-            levelLabel: LevelLabelInfo(level: 1, title: "My Body")),
+            state: .completed,
+            levelLabel: LevelLabelInfo(level: 1, title: "My Body", position: .below),
+            icon: "lockedLevelBg",
+        ),
     ]
     
     var body: some View {
@@ -51,7 +84,7 @@ struct RoadmapScreen: View {
                     .overlay(
                         Color.nomiPrimarySoft
                             .opacity(0.80)
-                            .blendMode(.overlay)   // ← blend mode bikin warna nyatu
+                            .blendMode(.overlay)
                     )
 
                 // Nodes
@@ -62,21 +95,17 @@ struct RoadmapScreen: View {
                             y: geo.size.height * nodes[i].y
                         )
                 }
-                
-                // Mascot
-//                VStack {
-//                    Spacer()
-//                    HStack(alignment: .bottom) {
-//                        MascotBubble(message: "Don't worry, I'm here")
-//                        Spacer()
-//                    }
-//                    .padding(.bottom, 20)
-//    
-//                    LevelBadge(level: 1, title: "My Body")
-//                        .padding(.bottom, 30)
-//                }
-//                .padding(.horizontal, 20)
 
+                // Mascot — fixed in left bottom
+                VStack {
+                    Spacer()
+                    HStack {
+                        MascotBubble(message: "Don't worry, I'm here")
+                            .padding(.leading, 10)
+                            .padding(.bottom, 230)
+                        Spacer()
+                    }
+                }
             }
         }
         .ignoresSafeArea()
@@ -85,37 +114,47 @@ struct RoadmapScreen: View {
     @ViewBuilder
     func nodeView(for node: RoadmapNodeData) -> some View {
         VStack(spacing: 6) {
-            // The circle (based on state)
-            circleView(state: node.state)
+            // Badge above node
+            if let label = node.levelLabel, label.position == .above {
+                LevelBadge(level: label.level, title: label.title, pointerUp: false)
+            }
 
-            // Optional level badge
-            if let label = node.levelLabel {
-                LevelBadge(level: label.level, title: label.title)
+            circleView(for: node)
+
+            // Badge below node
+            if let label = node.levelLabel, label.position == .below {
+                LevelBadge(level: label.level, title: label.title, pointerUp: true)
             }
         }
     }
-    
+
     @ViewBuilder
-    func circleView(state: NodeState) -> some View {
-        switch state {
+    func circleView(for node: RoadmapNodeData) -> some View {
+        switch node.state {
         case .completed:
-            Circle()
-                .fill(Color.nomiPrimary)
+            Image(node.icon)
+                .resizable()
+                .scaledToFit()
                 .frame(width: 70, height: 70)
+                .clipShape(Circle())
                 .overlay(Circle().stroke(.white, lineWidth: 3))
-    
+
         case .current:
-            Circle()
-                .fill(.white)
+            Image(node.icon)
+                .resizable()
+                .scaledToFit()
                 .frame(width: 90, height: 90)
+                .clipShape(Circle())
                 .shadow(color: .white.opacity(0.9), radius: 15)
                 .shadow(color: Color.nomiPrimary.opacity(0.5), radius: 25)
 
         case .locked:
-            Circle()
-                .fill(Color.nomiTextSecondary)
+            Image(node.icon)
+                .resizable()
+                .scaledToFit()
                 .frame(width: 70, height: 70)
-                .opacity(0.4)
+                .clipShape(Circle())
+                .opacity(0.6)
         }
     }
 
