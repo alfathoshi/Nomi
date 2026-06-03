@@ -24,15 +24,16 @@ struct PageCurlCarouselConfig{
 }
 struct PageCurlCarousel<Content: View>: View {
     var config: PageCurlCarouselConfig
+    @Binding var currentPage: Int                  // ← NEW: bind ke index page sekarang
     @ViewBuilder var content: (CGSize) -> Content
-    
+
     /// Scroll Progress
     @State private var scrollProgress: CGFloat = 0
     var body: some View {
-        
+
         GeometryReader{
             let size = $0.size
-            
+
             ScrollView(.horizontal){
                 LazyHStack(spacing: 0){
                     Group(subviews: content(size)){ collection in
@@ -57,17 +58,25 @@ struct PageCurlCarousel<Content: View>: View {
                             }
                             .visualEffect{content, proxy in
                                 let minX =  proxy.frame(in: .scrollView(axis: .horizontal)).minX
-                    
+
                                 return content
                                     .offset(x: -minX)
                             }
                             .zIndex(Double(-index))
+                            .id(index)                       // ← ID untuk scrollPosition
                         }
-                        
+
                     }
                 }
+                .scrollTargetLayout()                        // ← needed by scrollPosition
             }
             .scrollTargetBehavior(.paging)
+            .scrollPosition(id: Binding(                     // ← bind scroll ke currentPage
+                get: { currentPage },
+                set: { newValue in
+                    if let newValue { currentPage = newValue }
+                }
+            ))
             .onScrollGeometryChange(for: CGFloat.self){
                 $0.contentOffset.x + $0.contentInsets.leading
             } action: { oldValue, newValue in
