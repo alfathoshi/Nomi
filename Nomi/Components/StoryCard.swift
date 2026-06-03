@@ -14,8 +14,8 @@ struct StoryCard<Content: View>: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Left arrow
-            arrowButton(systemName: "chevron.left", action: onPrev)
+            // Left arrow (triangle pointing left)
+            arrowButton(pointsLeft: true, action: onPrev)
 
             // Card body
             VStack(spacing: 12) {
@@ -30,27 +30,61 @@ struct StoryCard<Content: View>: View {
             )
             .shadow(color: .black.opacity(0.1), radius: 10, y: 4)
 
-            // Right arrow
-            arrowButton(systemName: "chevron.right", action: onNext)
+            // Right arrow (triangle pointing right)
+            arrowButton(pointsLeft: false, action: onNext)
         }
-        .padding(.horizontal, 16)   // ← outer margin biar gak nempel ke edge
+        .padding(.horizontal, 16)
     }
 
     @ViewBuilder
-    private func arrowButton(systemName: String, action: (() -> Void)?) -> some View {
+    private func arrowButton(pointsLeft: Bool, action: (() -> Void)?) -> some View {
         if let action {
             Button(action: action) {
-                Image(systemName: systemName)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(.white)         // ← icon putih kontras
-                    .frame(width: 36, height: 36)
-                    .background(Circle().fill(Color.nomiPrimary))   // ← lingkaran ungu solid
-                    .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                TriangleShape()
+                    .fill(Color.nomiPrimarySoft)
+                    .rotationEffect(.degrees(pointsLeft ? 180 : 0))
+                    .frame(width: 28, height: 28)
+                    .shadow(color: .black.opacity(0.1), radius: 3, y: 2)
             }
         } else {
             // Placeholder kosong biar layout tetap simetris
-            Color.clear.frame(width: 36, height: 36)
+            Color.clear.frame(width: 28, height: 28)
         }
+    }
+}
+
+// MARK: - Triangle Shape (default points right, dengan rounded corners)
+struct TriangleShape: Shape {
+    var cornerRadius: CGFloat = 6   // 0 = sharp, > 0 = rounded
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        // 3 corner points
+        let topLeft     = CGPoint(x: rect.minX, y: rect.minY)
+        let rightPeak   = CGPoint(x: rect.maxX, y: rect.midY)
+        let bottomLeft  = CGPoint(x: rect.minX, y: rect.maxY)
+
+        if cornerRadius > 0 {
+            // Start di midpoint edge top-left → right-peak
+            path.move(to: CGPoint(
+                x: (topLeft.x + rightPeak.x) / 2,
+                y: (topLeft.y + rightPeak.y) / 2
+            ))
+            // Round corner di right-peak (heading from current point ke arah bottom-left)
+            path.addArc(tangent1End: rightPeak,  tangent2End: bottomLeft, radius: cornerRadius)
+            // Round corner di bottom-left
+            path.addArc(tangent1End: bottomLeft, tangent2End: topLeft,    radius: cornerRadius)
+            // Round corner di top-left
+            path.addArc(tangent1End: topLeft,    tangent2End: rightPeak,  radius: cornerRadius)
+            path.closeSubpath()
+        } else {
+            // Sharp triangle
+            path.move(to: topLeft)
+            path.addLine(to: rightPeak)
+            path.addLine(to: bottomLeft)
+            path.closeSubpath()
+        }
+        return path
     }
 }
 
