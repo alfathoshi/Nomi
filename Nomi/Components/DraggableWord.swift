@@ -33,11 +33,11 @@ struct DraggableWord: View {
     var body: some View {
         Group {
             Text(textItem.text)
-                .padding(.horizontal, 14)
+                .frame(width: 120)
                 .padding(.vertical, 10)
                 .background(Color.nomiPrimarySoft)
                 .foregroundColor(Color.nomiSurfaceTint)
-                .font(.heading1(weight: .bold))
+                .font(.heading2(weight: .bold))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .onTapGesture {
                     selectedText = textItem.id
@@ -88,8 +88,8 @@ struct DraggableWord: View {
                 if !isDragging {
                     isDragging = true
                 }
-                if dragScaleEffect != 0.75 {
-                    dragScaleEffect = 0.75
+                if dragScaleEffect != 1.5 {
+                    dragScaleEffect = 1.5
                 }
                 
                 let dragValue = value.first?.first
@@ -118,29 +118,30 @@ struct DraggableWord: View {
             .onEnded { _ in
                 if doctorsFrame.contains(currentPosition) {
                     let snapPosition = onDropToCategory(textItem.id, .doctors)
-                    
+                    let resolvedCategory = textItem.category
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         currentPosition = snapPosition
-                        currentRotation = .zero
+                        currentRotation = resolvedCategory == .unassigned ? textItem.rotationAngle : .zero
                         currentScale = 1
                     }
                     textItem.posX = snapPosition.x
                     textItem.posY = snapPosition.y
                     textItem.scale = 1
-                    textItem.rotation = 0
-                    textItem.category = .doctors
+                    textItem.rotation = resolvedCategory == .unassigned ? textItem.rotation : 0
+                    textItem.category = resolvedCategory
                 } else if strangersFrame.contains(currentPosition) {
                     let snapPosition = onDropToCategory(textItem.id, .strangers)
+                    let resolvedCategory = textItem.category
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                         currentPosition = snapPosition
-                        currentRotation = .zero
+                        currentRotation = resolvedCategory == .unassigned ? textItem.rotationAngle : .zero
                         currentScale = 1
                     }
                     textItem.posX = snapPosition.x
                     textItem.posY = snapPosition.y
                     textItem.scale = 1
-                    textItem.rotation = 0
-                    textItem.category = .strangers
+                    textItem.rotation = resolvedCategory == .unassigned ? textItem.rotation : 0
+                    textItem.category = resolvedCategory
                 } else {
                     let snapPosition = onDropToCategory(textItem.id, .unassigned)
                     

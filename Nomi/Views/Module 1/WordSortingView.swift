@@ -21,6 +21,16 @@ struct WordSortingView: View {
     @State private var wordBankFrame: CGRect = .zero
     @State private var selectedText: UUID?
     @State private var didPlaceInitialWords = false
+    @State private var privateContainerShake: CGFloat = 0
+    @State private var nonPrivateContainerShake: CGFloat = 0
+    @State private var showPrivateWrongOverlay = false
+    @State private var showNonPrivateWrongOverlay = false
+    @State private var privateWordOrder: [UUID] = []
+    @State private var nonPrivateWordOrder: [UUID] = []
+    @State private var bankWordOrder: [UUID] = []
+    @State private var initialBankOrder: [UUID] = []
+    @State private var initialBankPositions: [UUID: CGPoint] = [:]
+    @State private var initialBankRotations: [UUID: Double] = [:]
     
     let screenSize = UIScreen.main.bounds.size
     
@@ -44,14 +54,18 @@ struct WordSortingView: View {
                 VStack(spacing: 24) {
                     HStack(spacing: 16) {
                         DropContainer(
-                            title: "Doctors",
-                            frame: $doctorsFrame
+                            title: "Private",
+                            frame: $doctorsFrame,
+                            showWrongOverlay: showPrivateWrongOverlay
                         )
+                        .offset(x: privateContainerShake)
                         
                         DropContainer(
-                            title: "Strangers",
-                            frame: $strangersFrame
+                            title: "Non-Private",
+                            frame: $strangersFrame,
+                            showWrongOverlay: showNonPrivateWrongOverlay
                         )
+                        .offset(x: nonPrivateContainerShake)
                     }
                     
                     WordBankDropContainer(frame: $wordBankFrame)
@@ -65,7 +79,7 @@ struct WordSortingView: View {
                     .opacity(isFinishDisabled ? 0.7 : 1)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 56)
+                .padding(.top, 84)
                 .padding(.bottom, 44)
                 if didPlaceInitialWords {
                     ForEach($words, id: \.id) { $word in
@@ -77,7 +91,7 @@ struct WordSortingView: View {
                             strangersFrame: $strangersFrame,
                             wordBankFrame: $wordBankFrame,
                             onDropToCategory: snapPosition,
-                            selectedText: $selectedText
+                            selectedText: $selectedText,
                         )
                         .zIndex(draggingTextID == word.id ? 100 : 1)
                     }
@@ -114,7 +128,31 @@ struct WordSortingView: View {
             return .zero
         }
         
-        let previousCategory = words[wordIndex].category
+        if category != .unassigned {
+            let expectedCategory = correctCategory(for: words[wordIndex])
+
+            if expectedCategory != category {
+                triggerWrongDropFeedback(for: category)
+
+                removeWordFromAllOrders(wordID)
+                appendWord(wordID, to: .unassigned)
+
+                let bankSlotIndex = slotIndex(for: wordID, in: .unassigned)
+
+                words[wordIndex].category = .unassigned
+                words[wordIndex].rotation = initialBankRotations[wordID] ?? randomWordBankRotation(for: bankSlotIndex)
+                words[wordIndex].scale = 1
+
+                if let originalPosition = initialBankPositions[wordID] {
+                    return originalPosition
+                }
+
+                return randomWordBankPosition(
+                    for: bankSlotIndex,
+                    in: wordBankFrame
+                )
+            }
+        }
         
         let targetFrame: CGRect
         switch category {
@@ -126,20 +164,18 @@ struct WordSortingView: View {
             targetFrame = wordBankFrame
         }
         
-        let slotIndex: Int
-        if previousCategory == category {
-            let wordsInSameCategory = words.filter { $0.category == category }
-            slotIndex = wordsInSameCategory.firstIndex(where: { $0.id == wordID }) ?? 0
-        } else {
-            slotIndex = words.filter { $0.category == category }.count
-        }
-        
+        removeWordFromAllOrders(wordID)
+        appendWord(wordID, to: category)
+
         words[wordIndex].category = category
+
+        let slotIndex = slotIndex(for: wordID, in: category)
         
         let snapPoint: CGPoint
-        
+
         if category == .unassigned {
-            snapPoint = randomWordBankPosition(for: slotIndex, in: targetFrame)
+            snapPoint = initialBankPositions[wordID]
+                ?? randomWordBankPosition(for: slotIndex, in: targetFrame)
         } else {
             let verticalPadding: CGFloat = 46
             let chipHeight: CGFloat = 44
@@ -151,7 +187,9 @@ struct WordSortingView: View {
             )
         }
         
-        words[wordIndex].rotation = category == .unassigned ? randomWordBankRotation(for: slotIndex) : 0
+        words[wordIndex].rotation = category == .unassigned
+            ? (initialBankRotations[wordID] ?? randomWordBankRotation(for: slotIndex))
+            : 0
         words[wordIndex].scale = 1
         
         return snapPoint
@@ -164,13 +202,13 @@ struct WordSortingView: View {
     
     private func randomWordBankPosition(for index: Int, in frame: CGRect) -> CGPoint {
         let positions: [(CGFloat, CGFloat)] = [
-            (0.15, 0.32),
-            (0.50, 0.28),
-            (0.85, 0.34),
-            (0.35, 0.75),
-            (0.65, 0.75),
-            (0.18, 0.72),
-            (0.82, 0.72)
+            (0.20, 0.20),
+            (0.50, 0.14),
+            (0.80, 0.20),
+            (0.15, 0.55),
+            (0.50, 0.50),
+            (0.85, 0.55),
+            (0.50, 0.82)
         ]
         
         let point = positions[index % positions.count]
@@ -187,14 +225,120 @@ struct WordSortingView: View {
     }
     
     private func placeInitialWordsInWordBank() {
-        for index in words.indices {
-            words[index].category = .unassigned
-            words[index].scale = 1
-            words[index].rotation = randomWordBankRotation(for: index)
-            
-            let position = randomWordBankPosition(for: index, in: wordBankFrame)
-            words[index].posX = position.x
-            words[index].posY = position.y
+        bankWordOrder = words.map(\.id).shuffled()
+        initialBankOrder = bankWordOrder
+        privateWordOrder = []
+        nonPrivateWordOrder = []
+
+        for wordID in bankWordOrder {
+            guard let wordIndex = words.firstIndex(where: { $0.id == wordID }) else { continue }
+            let slotIndex = slotIndex(for: wordID, in: .unassigned)
+
+            words[wordIndex].category = .unassigned
+            words[wordIndex].scale = 1
+            words[wordIndex].rotation = randomWordBankRotation(for: slotIndex)
+
+            let position = randomWordBankPosition(
+                for: slotIndex,
+                in: wordBankFrame
+            )
+
+            words[wordIndex].posX = position.x
+            words[wordIndex].posY = position.y
+            initialBankPositions[wordID] = position
+            initialBankRotations[wordID] = words[wordIndex].rotation
+        }
+    }
+    
+    private func removeWordFromAllOrders(_ wordID: UUID) {
+        privateWordOrder.removeAll { $0 == wordID }
+        nonPrivateWordOrder.removeAll { $0 == wordID }
+        bankWordOrder.removeAll { $0 == wordID }
+    }
+    
+    private func appendWord(_ wordID: UUID, to category: WordCategory) {
+        switch category {
+        case .doctors:
+            if !privateWordOrder.contains(wordID) {
+                privateWordOrder.append(wordID)
+            }
+        case .strangers:
+            if !nonPrivateWordOrder.contains(wordID) {
+                nonPrivateWordOrder.append(wordID)
+            }
+        case .unassigned:
+            guard !bankWordOrder.contains(wordID) else { return }
+
+            let originalIndex = initialBankOrder.firstIndex(of: wordID) ?? initialBankOrder.count
+
+            let insertIndex = bankWordOrder.firstIndex { existingID in
+                let existingOriginalIndex = initialBankOrder.firstIndex(of: existingID) ?? initialBankOrder.count
+                return existingOriginalIndex > originalIndex
+            } ?? bankWordOrder.count
+
+            bankWordOrder.insert(wordID, at: insertIndex)
+        }
+    }
+    
+    private func slotIndex(for wordID: UUID, in category: WordCategory) -> Int {
+        switch category {
+        case .doctors:
+            return privateWordOrder.firstIndex(of: wordID) ?? privateWordOrder.count
+        case .strangers:
+            return nonPrivateWordOrder.firstIndex(of: wordID) ?? nonPrivateWordOrder.count
+        case .unassigned:
+            return bankWordOrder.firstIndex(of: wordID) ?? bankWordOrder.count
+        }
+    }
+    
+    private func correctCategory(for word: DragWordModel) -> WordCategory {
+        switch word.text.lowercased() {
+        case "penis", "vagina", "chest", "buttock":
+            return .doctors
+        default:
+            return .strangers
+        }
+    }
+    
+    private func triggerWrongDropFeedback(for category: WordCategory) {
+        let isPrivate = category == .doctors
+        
+        if isPrivate {
+            showPrivateWrongOverlay = true
+        } else {
+            showNonPrivateWrongOverlay = true
+        }
+
+        withAnimation(.easeInOut(duration: 0.05)) {
+            if isPrivate {
+                privateContainerShake = -5
+            } else {
+                nonPrivateContainerShake = -5
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            withAnimation(.easeInOut(duration: 0.05)) {
+                if isPrivate {
+                    privateContainerShake = 5
+                } else {
+                    nonPrivateContainerShake = 5
+                }
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.9)) {
+                privateContainerShake = 0
+                nonPrivateContainerShake = 0
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+            withAnimation(.easeOut(duration: 0.15)) {
+                showPrivateWrongOverlay = false
+                showNonPrivateWrongOverlay = false
+            }
         }
     }
 }
@@ -202,11 +346,12 @@ struct WordSortingView: View {
 struct DropContainer: View {
     let title: String
     @Binding var frame: CGRect
+    let showWrongOverlay: Bool
     
     var body: some View {
         VStack(alignment: .center, spacing: 12) {
             Text(title)
-                .font(.heading2(weight:.bold))
+                .font(.heading2(weight:.extraBold))
                 .foregroundStyle(Color.nomiTextPrimary)
             
             RoundedRectangle(cornerRadius: 24)
@@ -227,12 +372,21 @@ struct DropContainer: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(
-                            title == "Doctors"
+                            title == "Private"
                             ? Color.nomiSuccess.opacity(0.5)
                             : Color.nomiDanger.opacity(0.5),
                             lineWidth: 2
                         )
                 )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.red.opacity(showWrongOverlay ? 0.18 : 0))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.red.opacity(showWrongOverlay ? 0.9 : 0), lineWidth: 3)
+                )
+                .animation(.easeInOut(duration: 0.12), value: showWrongOverlay)
         }
     }
 }

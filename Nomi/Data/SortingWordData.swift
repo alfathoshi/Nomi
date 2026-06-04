@@ -11,6 +11,8 @@ struct SortingWordData {
         DragWordModel(text: "Vagina", posX: 0, posY: 0, rotation: 0, scale: 1),
         DragWordModel(text: "Arms", posX: 0, posY: 0, rotation: 0, scale: 1),
         DragWordModel(text: "Chest", posX: 0, posY: 0, rotation: 0, scale: 1),
-        DragWordModel(text: "Head", posX: 0, posY: 0, rotation: 0, scale: 1)
+        DragWordModel(text: "Head", posX: 0, posY: 0, rotation: 0, scale: 1),
+        DragWordModel(text: "Buttock", posX: 0, posY: 0, rotation: 0, scale: 1),
+        DragWordModel(text: "Legs", posX: 0, posY: 0, rotation: 0, scale: 1)
     ]
 }
