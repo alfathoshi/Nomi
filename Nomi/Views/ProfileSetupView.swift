@@ -19,34 +19,7 @@ struct ProfileSetupView: View {
                 Text("Step 1 of 2")
                     .font(.label(weight: .regular))
                 
-                GeometryReader { geometry in
-                    
-                    ZStack(alignment: .leading) {
-                        
-                        RoundedRectangle(cornerRadius: 999)
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 12)
-                        
-                        RoundedRectangle(cornerRadius: 999)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        .nomiPrimarySoft,
-                                        .nomiPrimarySoft,
-                                        .nomiPrimary,
-                                        
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .frame(
-                                width: geometry.size.width * 0.5,
-                                height: 12
-                            )
-                    }
-                }
-                .frame(height: 12)
+                ProgressBar(height: 12, progress: 0.5)
                 .padding(.bottom, 20)
                 
                 
