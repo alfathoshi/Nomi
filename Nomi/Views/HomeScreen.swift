@@ -8,99 +8,97 @@
 import SwiftUI
 
 struct HomeScreen: View {
-    let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
+    let topics: [TopicData] = [
+        TopicData(number: 1, title: "Body Parts & Boundaries",     characterImage: "HomeGirl", currentStep: 2, totalSteps: 5, isLocked: false),
+        TopicData(number: 2, title: "Personal Hygiene",            characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
+        TopicData(number: 3, title: "Consent & Saying Yes or No",  characterImage: "HomeGirl", currentStep: 0, totalSteps: 5, isLocked: true),
+        TopicData(number: 4, title: "Trusted Adults",              characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
     ]
-    
+
     var body: some View {
-        VStack{
-            
-            //Header
-            HStack{
-                VStack{
-                    HStack {
-                        VStack(alignment: .leading){
-                            Text("Good morning,")
-                                .font(.bodyMedium())
-                                .foregroundColor(.nomiTextSecondary)
-                            Text("Xatriya")
-                                .font(.heading1())
+        ZStack {
+            //background
+            Image("HomeBg")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .opacity(0.5)
+//                .brightness(-0.2)
 
-                        }
-                        Spacer()
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 22))
-                            .foregroundStyle(.white)
-                            .frame(width: 44, height: 44)
-                            .background(Color.nomiPrimary)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.nomiPrimary, lineWidth: 2)
-                                    .padding(-3)
+            VStack(spacing: 0) {
+                //greeting bubble + avatar
+                HStack(alignment: .top, spacing: 8) {
+                    greetingBubble
+
+                    Image(systemName: "person.fill")
+                        .frame(width: 48, height: 48)
+                        .background(Circle().fill(.white))
+                        .padding(.top, 8)
+                }
+                .padding(.horizontal, 40)
+                .zIndex(2)
+
+                //mascot
+                Image("NomiHome")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 200)
+                    .offset(y: -60)
+                    .shadow(radius: 15)
+                    .zIndex(0)
+
+                //cardlist
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 12) {
+                        ForEach(topics) { topic in
+                            TopicCard(
+                                number: topic.number,
+                                title: topic.title,
+                                characterImage: topic.characterImage,
+                                currentStep: topic.currentStep,
+                                totalSteps: topic.totalSteps,
+                                isLocked: topic.isLocked
                             )
+                        }
                     }
-                    .padding()
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 30)
                 }
+                .padding(.top, -90)
+                .padding(.horizontal, 30)
             }
-            .padding(.horizontal,20)
-            
-            //Streak
-            HStack(spacing: 12) {
-                Image(systemName: "flame")
-                    .font(.heading2())
-                    .foregroundColor(.nomiDanger)
-
-                VStack(alignment: .leading){
-                    Text("3 Day Streak!")
-                        .font(.bodyLarge(weight: .bold))
-                        .foregroundColor(.nomiAccent)
-                    Text("Keep learning every day")
-                        .font(.bodySmall())
-                        .foregroundColor(.nomiTextSecondary)
-                }
-
-                Spacer()
-
-                HStack(spacing: 4){
-                    Image(systemName: "star.fill").foregroundColor(.nomiAccent)
-                    Text("24")
-                        .font(.label())
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Capsule().fill(.white))
-
-            }
-            .padding(12)
-            .background(RoundedRectangle(cornerRadius: 20).fill(Color.nomiAccentSoft.opacity(0.2)))
-            .padding(.horizontal)
-            
-            Text("What do you want to learn?")
-                .font(.heading2())
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-                .padding(.vertical,5)
-            
-            //Grid
-            LazyVGrid(columns: columns, spacing: 16) {
-                LearningCard(title: "Body Parts &\nBoundaries", icon: "brain.fill", level: 2, color: .purple, progress: 0.4, isLocked: false)
-                LearningCard(title: "Personal Hygiene", icon: "hands.and.sparkles.fill", level: 1, color: .orange, progress: 0.25, isLocked: false)
-                LearningCard(title: "Consent &\nSaying Yes or No", icon: "hand.raised.fill", level: 1, color: .green, progress: 0.05, isLocked: false)
-                LearningCard(title: "Trusted Adults", icon: "shield.lefthalf.filled", level: 1, color: .mint, progress: 0, isLocked: true)
-                LearningCard(title: "Feelings & Emotions", icon: "heart.fill", level: 1, color: .pink, progress: 0, isLocked: true)
-                LearningCard(title: "How Families Grow", icon: "figure.2.and.child.holdinghands", level: 1, color: .teal, progress: 0, isLocked: true)
-            }
-            .padding()
         }
     }
+
+    // MARK: - Greeting bubble
+    private var greetingBubble: some View {
+        ZStack {
+            GreetingBubbleShape()
+                .fill(Color(red: 0.953, green: 0.937, blue: 0.996))   // #F3EFFE
+                .shadow(radius: 5)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Morning, Xatriya")
+                    .font(.heading2())
+                    .foregroundColor(.nomiTextPrimary)
+
+                Text("What do you want to learn?")
+                    .font(.bodyLarge())
+                    .foregroundColor(.nomiTextPrimary)
+
+                Text("Tap me to know me")
+                    .font(.bodyMedium(weight: .bold))
+                    .foregroundColor(.nomiPrimary)
+                    .padding(.top, 4)
+            }
+            .padding(.horizontal, 10)
+            .padding(.top, 10)
+            .padding(.bottom, 100)
+        }
+        .aspectRatio(305.0/206.0, contentMode: .fit)
+    }
 }
-
-
 
 #Preview {
     HomeScreen()
 }
-
-
