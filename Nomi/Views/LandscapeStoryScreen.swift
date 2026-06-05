@@ -7,13 +7,11 @@
 
 import SwiftUI
 
-// MARK: - Data Model
-struct StoryPage {
+struct StoryPageNew {
     let imageName: String
     let text: String
 }
 
-// MARK: - Text Size Options
 enum TextSize: String, CaseIterable {
     case small = "A"
     case medium = "AA"
@@ -27,7 +25,6 @@ enum TextSize: String, CaseIterable {
         }
     }
 
-    // Cycle ke size berikutnya
     var next: TextSize {
         let all = TextSize.allCases
         let i = all.firstIndex(of: self) ?? 0
@@ -36,12 +33,12 @@ enum TextSize: String, CaseIterable {
 }
 
 struct LandscapeStoryScreen: View {
-    let pages: [StoryPage] = [
-        StoryPage(imageName: "landscape 0",
+    let pages: [StoryPageNew] = [
+        StoryPageNew(imageName: "landscape 0",
                   text: "In a land full of wonder, there lived a small, spiky hedgehog named Nomi ..."),
-        StoryPage(imageName: "landscape 0",
-                  text: "Nomi loved exploring the forest with friends ..."),
-        StoryPage(imageName: "landscape 0",
+        StoryPageNew(imageName: "landscape 0",
+                  text: "One day, Nomi met her friend Pip, a tiny turtle squeezing into his shell that didn’t quite fit anymore."),
+        StoryPageNew(imageName: "landscape 0",
                   text: "One day, they found a magical adventure waiting ..."),
     ]
 
@@ -49,10 +46,10 @@ struct LandscapeStoryScreen: View {
     @State private var showMenu: Bool = false
     @State private var textSize: TextSize = .medium
     @StateObject private var tts = TTSManager()
-    
+
     var onHome: () -> Void = {}
 
-    private var currentPage: StoryPage { pages[currentIndex] }
+    private var currentPage: StoryPageNew { pages[currentIndex] }
     private var canGoPrev: Bool { currentIndex > 0 }
     private var canGoNext: Bool { currentIndex < pages.count - 1 }
 
@@ -60,31 +57,28 @@ struct LandscapeStoryScreen: View {
         GeometryReader { geo in
             ZStack {
                 PageCurlCarousel(config: config, currentPage: $currentIndex) { size in
-                    uiOverlay
-
                     ForEach(0..<pages.count, id: \.self) { index in
-                        Image(pages[index].imageName)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: size.width, height: size.height)
-                            .clipped()
+                        ZStack {
+                            Image(pages[index].imageName)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: size.width, height: size.height)
+                                .clipped()
+
+                            uiOverlay
+                        }
                     }
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
-
-                //if dont want to follow curl
-                //uiOverlay
             }
         }
         .ignoresSafeArea()
         .onAppear {
-            // Force landscape pas masuk screen ini
             #if os(iOS)
             OrientationManager.shared.lock(to: .landscape)
             #endif
         }
         .onDisappear {
-            // Unlock pas user keluar dari screen
             #if os(iOS)
             OrientationManager.shared.unlock()
             #endif
@@ -93,19 +87,16 @@ struct LandscapeStoryScreen: View {
 
     private var uiOverlay: some View {
         ZStack {
-            // Top-left: Home + Page Counter
             VStack(alignment: .leading, spacing: 8) {
                 homeButton
                 pageCounter
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(20)
-            
-            // Top right: sound + burger (atau menu kalau open)
+
             VStack(alignment: .trailing, spacing: 8) {
                 soundButton
 
-                // Burger toggles menu
                 if showMenu {
                     menuPanel
                 } else {
@@ -116,7 +107,6 @@ struct LandscapeStoryScreen: View {
             .padding(20)
             .animation(.spring(response: 0.35, dampingFraction: 0.75), value: showMenu)
 
-            // Bottom: Arrows + Text overlay
             HStack(spacing: 12) {
                 navButton(pointsLeft: true, isEnabled: canGoPrev) {
                     goToPage(currentIndex - 1)
@@ -133,8 +123,6 @@ struct LandscapeStoryScreen: View {
         }
     }
 
-    // MARK: - Top-Left Components
-
     private var homeButton: some View {
         Button(action: onHome) {
             Image(systemName: "house.fill")
@@ -145,10 +133,9 @@ struct LandscapeStoryScreen: View {
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
         }
     }
-    
+
     private var soundButton: some View {
         Button {
-            
             tts.speak(currentPage.text)
         } label: {
             Image(systemName: tts.isSpeaking ? "speaker.slash.fill" : "speaker.wave.2.fill")
@@ -169,7 +156,7 @@ struct LandscapeStoryScreen: View {
             .background(Capsule().fill(.white))
             .shadow(color: .black.opacity(0.1), radius: 3, y: 2)
     }
-    
+
     private var burger: some View {
         Button {
             showMenu = true
@@ -183,10 +170,8 @@ struct LandscapeStoryScreen: View {
         }
     }
 
-    // MARK: - Menu Panel (Contents + Text Size)
     private var menuPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header: X close button
             HStack {
                 Spacer()
                 Button {
@@ -201,9 +186,7 @@ struct LandscapeStoryScreen: View {
             .padding(.horizontal, 12)
             .padding(.top, 8)
 
-            // Row 1: Contents (placeholder, belum wired)
             menuRow(icon: "square.grid.2x2.fill", label: "Contents") {
-                // TODO: show contents
                 showMenu = false
             }
 
@@ -211,7 +194,6 @@ struct LandscapeStoryScreen: View {
                 .background(Color.white.opacity(0.4))
                 .padding(.horizontal, 16)
 
-            // Row 2: Text Size (cycles small → medium → large)
             menuRow(icon: "textformat.size", label: "Text Size  \(textSize.rawValue)") {
                 textSize = textSize.next
             }
@@ -239,12 +221,11 @@ struct LandscapeStoryScreen: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .contentShape(Rectangle())   // tap area = seluruh row, bukan cuma text
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: - Text Overlay (bottom) — font size dinamis ngikutin textSize
     private var storyTextOverlay: some View {
         Text(processedText(currentPage.text))
             .font(.system(size: textSize.fontSize, weight: .semibold))
@@ -262,7 +243,6 @@ struct LandscapeStoryScreen: View {
             .animation(.easeInOut(duration: 0.2), value: textSize)
     }
 
-    // Auto-highlight kata "Nomi" pake AttributedString
     private func processedText(_ raw: String) -> AttributedString {
         var attr = AttributedString(raw)
         if let range = attr.range(of: "Nomi") {
@@ -272,7 +252,6 @@ struct LandscapeStoryScreen: View {
         return attr
     }
 
-    // MARK: - Nav Arrow Button
     @ViewBuilder
     private func navButton(pointsLeft: Bool, isEnabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
@@ -286,20 +265,15 @@ struct LandscapeStoryScreen: View {
         .disabled(!isEnabled)
     }
 
-    // MARK: - Action
     private func goToPage(_ index: Int) {
         guard index >= 0, index < pages.count else { return }
-        // Auto-stop TTS pas ganti page
         tts.stop()
-        // Slow + natural page-flip feel (kayak ngebalik buku)
         withAnimation(.easeInOut(duration: 1.2)) {
             currentIndex = index
         }
     }
 
-    // MARK: - PageCurl Config
     var config: PageCurlCarouselConfig {
-        // curlRadius lebih besar → curl lebih lebar/dramatic kayak halaman buku tebel
         .init(curlRadius: 120)
     }
 }
