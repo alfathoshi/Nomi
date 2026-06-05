@@ -24,9 +24,10 @@ struct PortraitStoryScreen: View {
     ]
 
     @State private var currentPage: Int = 0
+    @State private var navigateToFlipCard = false
 
     private var canGoBack: Bool { currentPage > 0 }
-    private var canGoNext: Bool { currentPage < pages.count - 1 }
+    private var canGoNext: Bool { currentPage < pages.count}
 
     var body: some View {
         ZStack {
@@ -52,10 +53,23 @@ struct PortraitStoryScreen: View {
                             .scaledToFill()
                             .frame(width: size.width, height: size.height)
                             .clipped()
-
                     }
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
-                .frame(width: geo.size.width, height: geo.size.height)
+                
+                // ── UI OVERLAY (glass elements, fixed outside carousel) ──
+                VStack {
+                    // Top: page counter + title card
+                    topOverlay
+                        .padding(.top, 60)
+                    
+                    Spacer()
+                    
+                    // Bottom: Back / Next buttons
+                    bottomNavigation
+                        .padding(.bottom, 40)
+                }
+                .padding(.horizontal, 20)
             }
 
             // ── UI OVERLAY (glass elements, fixed outside carousel) ──
@@ -72,7 +86,6 @@ struct PortraitStoryScreen: View {
 //            }
 //            .padding(.horizontal, 20)
         }
-        .ignoresSafeArea()
     }
 
     // MARK: - Top Overlay (counter + title card)
@@ -123,7 +136,11 @@ struct PortraitStoryScreen: View {
                 iconLeading: false,
                 isEnabled: canGoNext
             ) {
-                goToPage(currentPage + 1)
+                if currentPage == pages.count - 1 {
+                    navigateToFlipCard.toggle()
+                } else {
+                    goToPage(currentPage + 1)
+                }
             }
         }
     }

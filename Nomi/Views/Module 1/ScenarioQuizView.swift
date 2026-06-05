@@ -15,6 +15,7 @@ struct ScenarioQuizView: View {
     
     @State private var currentIndex = 0
     @State private var shakeAmount: CGFloat = 0
+    @State private var navigateToTrustContract: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -59,6 +60,10 @@ struct ScenarioQuizView: View {
                     .frame(width: geo.size.width, height: geo.size.height)
                 }
             }
+            .navigationDestination(isPresented: $navigateToTrustContract) {
+                Level5ExplanationView()
+                    .navigationBarBackButtonHidden(true)
+            }
             .ignoresSafeArea()
             .toolbar(.hidden, for: .navigationBar)
         }
@@ -72,13 +77,14 @@ struct ScenarioQuizView: View {
             withAnimation(.easeInOut(duration: 0.45)) {
                 shakeAmount += 1
             }
-//            playWrongAnswerVoice()
         }
     }
     
     private func goToNextScenario() {
         if currentIndex < scenarioData.scenarios.count - 1 {
             currentIndex += 1
+        } else {
+            navigateToTrustContract = true
         }
     }
     

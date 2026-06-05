@@ -9,8 +9,14 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @AppStorage("hasSeenSplash") private var hasSeenSplash = false
+    
     var body: some View {
-        SplashScreen()
+        if hasSeenSplash {
+            HomeScreen()
+        } else {
+            SplashScreen()
+        }
     }
 }
 

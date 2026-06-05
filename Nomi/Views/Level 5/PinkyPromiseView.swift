@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct PinkyPromiseView: View {
+    @State private var navigateToHome: Bool = false
     var body: some View {
         NavigationStack {
             ZStack {
@@ -74,11 +75,15 @@ struct PinkyPromiseView: View {
                     Spacer()
                     
                     WideButton(title: "SEAL IT", icon: nil) {
-                        
+                        navigateToHome.toggle()
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 44)
                 }
+            }
+            .navigationDestination(isPresented: $navigateToHome) {
+                HomeScreen()
+                    .navigationBarBackButtonHidden(true)
             }
         }
     }
