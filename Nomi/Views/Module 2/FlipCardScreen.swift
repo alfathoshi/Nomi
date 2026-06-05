@@ -210,7 +210,7 @@ struct FlippableCardView: View {
             .degrees(isFlipped ? 180 : 0),
             axis: (x: 0, y: 1, z: 0)
         )
-        .animation(.easeInOut(duration: 0.6), value: isFlipped)
+        .animation(.easeInOut(duration: 0.8), value: isFlipped)
     }
 
     // MARK: - Front (purple, tap to flip)
