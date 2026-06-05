@@ -6,8 +6,16 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct ScenarioQuizView: View {
+    private let scenarioData = ScenarioData()
+    private let correctAnswers: [Bool] = [false, true]
+    private let speechSynthesizer = AVSpeechSynthesizer()
+    
+    @State private var currentIndex = 0
+    @State private var shakeAmount: CGFloat = 0
+    
     var body: some View {
         NavigationStack {
             GeometryReader { geo in
@@ -19,31 +27,30 @@ struct ScenarioQuizView: View {
                         .clipped()
                         .ignoresSafeArea()
 
-                    VStack(spacing: 22) {
+                    VStack() {
                         Spacer()
                     Text("Safety Detective")
                         .font(.heading1(weight: .black, size: 38))
                         .foregroundStyle(Color.nomiTextPrimary)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 88)
-                    Spacer()
+                        
+                    
                     ScenarioCard(
-                        image: .story1,
-                        text: """
-                        An older kid at the park says, "Let's go behind the tree and show each other our private parts. It's a fun game!"
-                        """
+                        image: scenarioData.scenarios[currentIndex].image,
+                        text: scenarioData.scenarios[currentIndex].content
                     )
                     .padding(.horizontal, 22)
+                    .modifier(ShakeEffect(animatableData: shakeAmount))
 
-                    Spacer(minLength: 16)
+                    Spacer()
 
                     HStack(spacing: 14) {
                         WideButton(title: "Safe", background: .nomiSuccess, foreground: .white) {
-
+                            checkAnswer(isSafeAnswer: true)
                         }
 
                         WideButton(title: "Unsafe", background: .nomiDanger, foreground: .white) {
-
+                            checkAnswer(isSafeAnswer: false)
                         }
                     }
                     .padding(.horizontal, 24)
@@ -55,6 +62,53 @@ struct ScenarioQuizView: View {
             .ignoresSafeArea()
             .toolbar(.hidden, for: .navigationBar)
         }
+    }
+    private func checkAnswer(isSafeAnswer: Bool) {
+        let correctAnswer = correctAnswers[currentIndex]
+
+        if isSafeAnswer == correctAnswer {
+            goToNextScenario()
+        } else {
+            withAnimation(.easeInOut(duration: 0.45)) {
+                shakeAmount += 1
+            }
+//            playWrongAnswerVoice()
+        }
+    }
+    
+    private func goToNextScenario() {
+        if currentIndex < scenarioData.scenarios.count - 1 {
+            currentIndex += 1
+        }
+    }
+    
+    private func playWrongAnswerVoice() {
+        let voice = AVSpeechSynthesisVoice(
+            identifier: "com.apple.voice.enhanced.en-US.Samantha"
+        ) ?? AVSpeechSynthesisVoice(language: "en-US")
+
+        let utterance = AVSpeechUtterance(string: """
+            An older kid at the park says,
+            "Let's go behind the tree and show each other our private parts. It's a fun game!"
+            """)
+        utterance.voice = voice
+
+        speechSynthesizer.speak(utterance)
+    }
+}
+
+struct ShakeEffect: GeometryEffect {
+    var travelDistance: CGFloat = 20
+    var numberOfShakes: CGFloat = 4
+    var animatableData: CGFloat
+    
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(
+            CGAffineTransform(
+                translationX: travelDistance * sin(animatableData * .pi * numberOfShakes),
+                y: 0
+            )
+        )
     }
 }
 
