@@ -41,41 +41,47 @@ struct FlipCardScreen: View {
 
     @State private var currentIndex = 0
     @State private var showCompletionPopup = false       // ← NEW: track popup visibility
-
+    @State private var navigateToWordSorting = false
     private var currentCard: FlipCard {
         cards[currentIndex]
     }
 
     var body: some View {
-        ZStack {
-            // Faded background
-            Image(.storyBackground)
-                .resizable()
-                .scaledToFill()
-                .frame(
-                    width: screenSize.width,
-                    height: screenSize.height
-                )
-                .clipped()
-                .ignoresSafeArea()
-
-            VStack(spacing: 24) {
-                // Title
-                Text("Doctor's Words")
-                    .font(.heading1(size: 36))
-                    .foregroundColor(.nomiTextPrimary)
-                    .padding(.top, 100)
-
-                cardStack
-                    .padding(.top, 78)
-
-                Spacer()
-                Spacer()
+        NavigationStack {
+            ZStack {
+                // Faded background
+                Image(.storyBackground)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(
+                        width: screenSize.width,
+                        height: screenSize.height
+                    )
+                    .clipped()
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 24) {
+                    // Title
+                    Text("Doctor's Words")
+                        .font(.heading1(size: 36))
+                        .foregroundColor(.nomiTextPrimary)
+                        .padding(.top, 100)
+                    
+                    cardStack
+                        .padding(.top, 78)
+                    
+                    Spacer()
+                    Spacer()
+                }
+                
+                // Completion popup overlay
+                if showCompletionPopup {
+                    completionPopup
+                }
             }
-
-            // Completion popup overlay
-            if showCompletionPopup {
-                completionPopup
+            .navigationDestination(isPresented: $navigateToWordSorting) {
+                WordSortingView()
+                    .navigationBarBackButtonHidden(true)
             }
         }
     }
@@ -148,7 +154,7 @@ struct FlipCardScreen: View {
                     .scaledToFit()
                     .frame(height: 200)
 
-                Button(action: dismissPopup) {
+                Button(action: {navigateToWordSorting = true}) {
                     HStack(spacing: 8) {
                         Text("Next Level")
                             .font(.heading3())

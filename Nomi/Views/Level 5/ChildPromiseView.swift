@@ -1,5 +1,5 @@
 //
-//  TrustContractView.swift
+//  ChildPromiseView.swift
 //  Nomi
 //
 //  Created by Muhammad Bintang Al-Fath on 05/06/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TrustContractView: View {
+struct ChildPromiseView: View {
     @State private var navigateToParentPromise = false
     var body: some View {
         NavigationStack {
@@ -60,5 +60,5 @@ struct TrustContractView: View {
 }
 
 #Preview {
-    TrustContractView()
+    ChildPromiseView()
 }

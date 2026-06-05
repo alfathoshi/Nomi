@@ -24,41 +24,48 @@ struct StoryScreen: View {
     ]
 
     @State private var currentPage: Int = 0
+    @State private var navigateToFlipCard = false
 
     private var canGoBack: Bool { currentPage > 0 }
-    private var canGoNext: Bool { currentPage < pages.count - 1 }
+    private var canGoNext: Bool { currentPage < pages.count}
 
     var body: some View {
-        ZStack {
-            // ── PAGE CURL CAROUSEL (background) ──
-            GeometryReader { geo in
-                PageCurlCarousel(config: config, currentPage: $currentPage) { size in
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        Image(pages[index].imageName)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: size.width, height: size.height)
-                            .clipped()
+        NavigationStack {
+            ZStack {
+                // ── PAGE CURL CAROUSEL (background) ──
+                GeometryReader { geo in
+                    PageCurlCarousel(config: config, currentPage: $currentPage) { size in
+                        ForEach(0..<pages.count, id: \.self) { index in
+                            Image(pages[index].imageName)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: size.width, height: size.height)
+                                .clipped()
+                        }
                     }
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
-                .frame(width: geo.size.width, height: geo.size.height)
+                
+                // ── UI OVERLAY (glass elements, fixed outside carousel) ──
+                VStack {
+                    // Top: page counter + title card
+                    topOverlay
+                        .padding(.top, 60)
+                    
+                    Spacer()
+                    
+                    // Bottom: Back / Next buttons
+                    bottomNavigation
+                        .padding(.bottom, 40)
+                }
+                .padding(.horizontal, 20)
             }
-
-            // ── UI OVERLAY (glass elements, fixed outside carousel) ──
-            VStack {
-                // Top: page counter + title card
-                topOverlay
-                    .padding(.top, 60)
-
-                Spacer()
-
-                // Bottom: Back / Next buttons
-                bottomNavigation
-                    .padding(.bottom, 40)
+            .navigationDestination(isPresented: $navigateToFlipCard) {
+                DoctorWordsScreen()
+                    .navigationBarBackButtonHidden(true)
             }
-            .padding(.horizontal, 20)
+            .ignoresSafeArea()
         }
-        .ignoresSafeArea()
     }
 
     // MARK: - Top Overlay (counter + title card)
@@ -109,7 +116,11 @@ struct StoryScreen: View {
                 iconLeading: false,
                 isEnabled: canGoNext
             ) {
-                goToPage(currentPage + 1)
+                if currentPage == pages.count - 1 {
+                    navigateToFlipCard.toggle()
+                } else {
+                    goToPage(currentPage + 1)
+                }
             }
         }
     }

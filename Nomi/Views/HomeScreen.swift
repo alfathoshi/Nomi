@@ -80,7 +80,7 @@ struct HomeScreen: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToStoryBook) {
-                StoryBookView()
+                StoryScreen()
                     .navigationBarBackButtonHidden(true)
             }
             .navigationBarBackButtonHidden(true)
