@@ -15,6 +15,7 @@ struct StoryBookView: View {
     var page: StoryPage {
         data.pages[currentPage]
     }
+    @State private var navigateToWordSorting = false
     var body: some View {
         NavigationStack {
             VStack {
@@ -92,21 +93,29 @@ struct StoryBookView: View {
                         
                         Spacer()
                         
-                        HStack(spacing: 8) {
-                            ForEach(0..<totalPages, id: \.self) { index in
-                                Capsule()
-                                    .fill(
-                                        index == currentPage
-                                        ? Color.nomiPrimary
-                                        : Color.gray.opacity(0.5)
-                                    )
-                                    .frame(
-                                        width: index == currentPage ? 24 : 8,
-                                        height: 8
-                                    )
-                                    .animation(.easeInOut(duration: 0.2), value: currentPage)
+                        if currentPage == totalPages - 1 {
+                            WideButton(title: "Next"){
+                                navigateToWordSorting = true
+                            }
+                        } else {
+                            HStack(spacing: 8) {
+                                ForEach(0..<totalPages, id: \.self) { index in
+                                    Capsule()
+                                        .fill(
+                                            index == currentPage
+                                            ? Color.nomiPrimary
+                                            : Color.gray.opacity(0.5)
+                                        )
+                                        .frame(
+                                            width: index == currentPage ? 24 : 8,
+                                            height: 8
+                                        )
+                                        .animation(.easeInOut(duration: 0.2), value: currentPage)
+                                }
                             }
                         }
+                        
+                       
                         
                         Spacer()
                         
@@ -146,6 +155,10 @@ struct StoryBookView: View {
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
+            }
+            .navigationDestination(isPresented: $navigateToWordSorting) {
+                WordSortingView()
+                    .navigationBarBackButtonHidden(true)
             }
             
         }
