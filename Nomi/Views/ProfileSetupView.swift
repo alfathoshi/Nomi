@@ -109,7 +109,7 @@ struct ProfileSetupView: View {
             .padding(.horizontal, 20)
             .padding(.top, 20)
             .navigationTitle("Set up Your Profile")
-            .navigationBarTitleDisplayMode(.inline)
+            //.navigationBarTitleDisplayMode(.inline)
         }
     }
 }
