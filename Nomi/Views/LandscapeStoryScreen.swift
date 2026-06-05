@@ -46,42 +46,45 @@ struct LandscapeStoryScreen: View {
     @State private var showMenu: Bool = false
     @State private var textSize: TextSize = .medium
     @StateObject private var tts = TTSManager()
+    @State private var navigateToFlipCard = false
 
     var onHome: () -> Void = {}
 
     private var currentPage: StoryPageNew { pages[currentIndex] }
     private var canGoPrev: Bool { currentIndex > 0 }
-    private var canGoNext: Bool { currentIndex < pages.count - 1 }
+    private var canGoNext: Bool { currentIndex < pages.count }
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                PageCurlCarousel(config: config, currentPage: $currentIndex) { size in
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        ZStack {
-                            Image(pages[index].imageName)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: size.width, height: size.height)
-                                .clipped()
-
-                            uiOverlay
+        NavigationStack {
+            GeometryReader { geo in
+                ZStack {
+                    PageCurlCarousel(config: config, currentPage: $currentIndex) { size in
+                        ForEach(0..<pages.count, id: \.self) { index in
+                            ZStack {
+                                Image(pages[index].imageName)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: size.width, height: size.height)
+                                    .clipped()
+                                
+                                uiOverlay
+                            }
                         }
                     }
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
-                .frame(width: geo.size.width, height: geo.size.height)
             }
-        }
-        .ignoresSafeArea()
-        .onAppear {
-            #if os(iOS)
-            OrientationManager.shared.lock(to: .landscape)
-            #endif
-        }
-        .onDisappear {
-            #if os(iOS)
-            OrientationManager.shared.unlock()
-            #endif
+            .ignoresSafeArea()
+            .onAppear {
+#if os(iOS)
+                OrientationManager.shared.lock(to: .landscape)
+#endif
+            }
+            .onDisappear {
+#if os(iOS)
+                OrientationManager.shared.lock(to: .portrait)
+#endif
+            }
         }
     }
 
@@ -114,9 +117,22 @@ struct LandscapeStoryScreen: View {
 
                 storyTextOverlay
 
-                navButton(pointsLeft: false, isEnabled: canGoNext) {
-                    goToPage(currentIndex + 1)
+                navButton(pointsLeft: false, isEnabled: true) {
+                    if currentIndex == pages.count - 1 {
+                        navigateToPortraitScreen()
+                    } else {
+                        goToPage(currentIndex + 1)
+                    }
                 }
+            }
+            .navigationDestination(isPresented: $navigateToFlipCard) {
+                DoctorWordsScreen()
+                    .navigationBarBackButtonHidden(true)
+                    .onAppear {
+#if os(iOS)
+                        OrientationManager.shared.lock(to: .portrait)
+#endif
+                    }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             .padding(20)
@@ -270,6 +286,18 @@ struct LandscapeStoryScreen: View {
         tts.stop()
         withAnimation(.easeInOut(duration: 1.2)) {
             currentIndex = index
+        }
+    }
+
+    private func navigateToPortraitScreen() {
+        tts.stop()
+#if os(iOS)
+        OrientationManager.shared.lock(to: .portrait)
+        UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+        UIViewController.attemptRotationToDeviceOrientation()
+#endif
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            navigateToFlipCard = true
         }
     }
 
