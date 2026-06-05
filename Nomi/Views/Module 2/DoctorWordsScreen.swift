@@ -36,7 +36,7 @@ struct DoctorWordsScreen: View {
                         .padding(.top, 100)
                     
                     // Mascot
-                    Image("NomiHome")
+                    Image("NomiDoctor")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 280)

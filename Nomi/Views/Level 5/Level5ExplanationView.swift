@@ -17,7 +17,7 @@ struct Level5ExplanationView: View {
         NavigationStack {
             LevelExplanationScreen(
                 title: "The Trust Contract",
-                mascotImage: "NomiHome",
+                mascotImage: "NomiDefault",
                 paragraphs: [
                     Text("Now it’s time to find your Trusted Adult!").font(.heading2(weight: .black, size: 20)),
                     Text(" Go invite a Parent, Guardian, or safe grown-up to join you for a special \(highlight)").font(.heading2(weight: .semiBold, size: 20))
