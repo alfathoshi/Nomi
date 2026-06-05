@@ -10,10 +10,10 @@ import SwiftUI
 // MARK: - Data Model
 struct StoryPageContent {
     let imageName: String
-    let title: String         // shown di top glass card
+    let title: String
 }
 
-struct StoryScreen: View {
+struct PortraitStoryScreen: View {
     let pages: [StoryPageContent] = [
         StoryPageContent(imageName: "page 0",
                          title: "Let's Go for a Body Adventure\nAre You Ready?"),
@@ -34,29 +34,43 @@ struct StoryScreen: View {
             GeometryReader { geo in
                 PageCurlCarousel(config: config, currentPage: $currentPage) { size in
                     ForEach(0..<pages.count, id: \.self) { index in
+                        VStack {
+                            // Top: page counter + title card
+                            topOverlay
+                                .padding(.top, 60)
+
+                            Spacer()
+
+                            // Bottom: Back / Next buttons
+                            bottomNavigation
+                                .padding(.bottom, 40)
+                        }
+                        .padding(.horizontal, 20)
+                        
                         Image(pages[index].imageName)
                             .resizable()
                             .scaledToFill()
                             .frame(width: size.width, height: size.height)
                             .clipped()
+
                     }
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
             }
 
             // ── UI OVERLAY (glass elements, fixed outside carousel) ──
-            VStack {
-                // Top: page counter + title card
-                topOverlay
-                    .padding(.top, 60)
-
-                Spacer()
-
-                // Bottom: Back / Next buttons
-                bottomNavigation
-                    .padding(.bottom, 40)
-            }
-            .padding(.horizontal, 20)
+//            VStack {
+//                // Top: page counter + title card
+//                topOverlay
+//                    .padding(.top, 60)
+//
+//                Spacer()
+//
+//                // Bottom: Back / Next buttons
+//                bottomNavigation
+//                    .padding(.bottom, 40)
+//            }
+//            .padding(.horizontal, 20)
         }
         .ignoresSafeArea()
     }
@@ -73,17 +87,17 @@ struct StoryScreen: View {
             // Glass title card
             Text(pages[currentPage].title)
                 .font(.heading3())
-                .foregroundColor(.nomiTextPrimary)
+                .foregroundColor(.white)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity)
-                .background(.ultraThinMaterial)         // ← GLASS EFFECT
+                .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 32))
                 .overlay(
                     RoundedRectangle(cornerRadius: 32)
-                        .stroke(.white.opacity(0.4), lineWidth: 1)   // subtle glass edge
+                        .stroke(.white.opacity(0.4), lineWidth: 1)
                 )
                 .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
         }
@@ -156,7 +170,7 @@ struct StoryScreen: View {
     // MARK: - Action
     private func goToPage(_ index: Int) {
         guard index >= 0, index < pages.count else { return }
-        withAnimation(.easeInOut(duration: 1.2)) {        // slow page-flip feel
+        withAnimation(.easeInOut(duration: 1.2)) {
             currentPage = index
         }
     }
@@ -168,5 +182,5 @@ struct StoryScreen: View {
 }
 
 #Preview {
-    StoryScreen()
+    PortraitStoryScreen()
 }
