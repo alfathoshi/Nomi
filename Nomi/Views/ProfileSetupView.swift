@@ -30,13 +30,25 @@ struct ProfileSetupView: View {
 
         return Double(completed) / 4.0
     }
+
+    private var completedProfileSteps: Int {
+        var completed = 0
+
+        if selectedAvatar != nil { completed += 1 }
+        if !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { completed += 1 }
+        if selectedAge != nil { completed += 1 }
+        if selectedGender != nil { completed += 1 }
+
+        return min(max(completed, 1), 4)
+    }
     var body: some View {
         NavigationStack{
             VStack (alignment: .leading) {
-                Text("Step 1 of 2")
+                Text("Step \(completedProfileSteps) of 4")
                     .font(.label(weight: .regular))
                 
                 ProgressBar(height: 12, progress: profileProgress)
+                    .animation(.spring(response: 0.45, dampingFraction: 0.8), value: profileProgress)
                     .padding(.bottom, 20)
                 
                 
