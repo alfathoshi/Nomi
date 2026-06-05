@@ -70,9 +70,9 @@ struct OnBoardingView: View {
                         title: "Parents can check in too",
                         subtitle: "A special area just for grown-ups",
                         color: .surfaceAccent,
-                        iconColor: .accentSoft,)
+                        iconColor: .accentSoft,
+                    )
                 }
-                
                 
                 Spacer()
                 

@@ -15,7 +15,7 @@ struct WideButton: View {
     let foreground: Color?
     let action: () -> Void
     
-    init(title: String, icon: String?, background: Color? = nil, foreground: Color? = nil, action: @escaping () -> Void) {
+    init(title: String, icon: String? = nil, background: Color? = nil, foreground: Color? = nil, action: @escaping () -> Void) {
         self.title = title
         self.icon = icon
         self.background = background
