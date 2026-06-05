@@ -123,7 +123,7 @@ struct WordSortingView: View {
                 didPlaceInitialWords = true
             }
             .navigationDestination(isPresented: $navigateToScenarioQuiz) {
-                ScenarioQuizView()
+                Level4ExplanationView()
                     .navigationBarBackButtonHidden(true)
             }
         }

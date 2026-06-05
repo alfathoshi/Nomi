@@ -80,7 +80,7 @@ struct FlipCardScreen: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToWordSorting) {
-                WordSortingView()
+                Level3ExplanationView()
                     .navigationBarBackButtonHidden(true)
             }
         }

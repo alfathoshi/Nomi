@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "5F75ED332FC51FB800DF6952"
-               BuildableName = "Nomi.app"
+               BuildableName = "Nomi - Kids Sex Education.app"
                BlueprintName = "Nomi"
                ReferencedContainer = "container:Nomi.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5F75ED332FC51FB800DF6952"
-            BuildableName = "Nomi.app"
+            BuildableName = "Nomi - Kids Sex Education.app"
             BlueprintName = "Nomi"
             ReferencedContainer = "container:Nomi.xcodeproj">
          </BuildableReference>
@@ -63,7 +63,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "5F75ED332FC51FB800DF6952"
-            BuildableName = "Nomi.app"
+            BuildableName = "Nomi - Kids Sex Education.app"
             BlueprintName = "Nomi"
             ReferencedContainer = "container:Nomi.xcodeproj">
          </BuildableReference>
