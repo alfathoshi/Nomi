@@ -7,99 +7,164 @@
 
 import SwiftUI
 
+// MARK: - Data Model
+struct StoryPageContent {
+    let imageName: String
+    let title: String         // shown di top glass card
+}
+
 struct StoryScreen: View {
-    let amazing = Text("AMAZING?").foregroundColor(.nomiPrimary)
+    let pages: [StoryPageContent] = [
+        StoryPageContent(imageName: "page 0",
+                         title: "Let's Go for a Body Adventure\nAre You Ready?"),
+        StoryPageContent(imageName: "page 1",
+                         title: "Meet your body parts\nLet's explore!"),
+        StoryPageContent(imageName: "page 2",
+                         title: "Stay safe, stay strong\nYou got this!"),
+    ]
+
     @State private var currentPage: Int = 0
-    private let totalPages = 4                        // 0..3 (index)
-    
+
+    private var canGoBack: Bool { currentPage > 0 }
+    private var canGoNext: Bool { currentPage < pages.count - 1 }
+
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Carousel — fullscreen edge to edge
+        ZStack {
+            // ── PAGE CURL CAROUSEL (background) ──
             GeometryReader { geo in
                 PageCurlCarousel(config: config, currentPage: $currentPage) { size in
-                    ForEach(0..<totalPages, id: \.self) { index in
-                        ZStack {
-                            Image("page \(index)")
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: size.width, height: size.height)
-                                .clipped()
-
-                            if index == 0 {
-                                StoryCard(
-                                    onPrev: currentPage > 0 ? {
-                                        withAnimation(.easeInOut(duration: 0.5)) {
-                                            currentPage -= 1
-                                        }
-                                    } : nil,
-                                    onNext: currentPage < totalPages - 1 ? {
-                                        withAnimation(.easeInOut(duration: 0.5)) {
-                                            currentPage += 1
-                                        }
-                                    } : nil
-                                ) {
-                                    Text("Before we start,\ndid you know your body\nis \(amazing)")
-                                        .font(.heading3())
-                                        .multilineTextAlignment(.center)
-
-                                    Text("It helps you run, jump,\nwiggle, dance, and\ngives the BEST hugs ever!")
-                                        .font(.bodyMedium(weight: .bold))
-                                        .multilineTextAlignment(.center)
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                                .padding(.top, 80)   // top padding lebih besar biar gak ke-notch
-                            }
-                        }
+                    ForEach(0..<pages.count, id: \.self) { index in
+                        Image(pages[index].imageName)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: size.width, height: size.height)
+                            .clipped()
                     }
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
             }
 
-            // Page indicator
-            HStack(spacing: 8) {
-                ForEach(0..<totalPages, id: \.self) { index in
-                    Capsule()
-                        .fill(
-                            index == currentPage
-                            ? Color.nomiPrimary
-                            : Color.gray.opacity(0.5)
-                        )
-                        .frame(
-                            width: index == currentPage ? 24 : 8,
-                            height: 8
-                        )
-                        .animation(.easeInOut(duration: 0.2), value: currentPage)
-                }
+            // ── UI OVERLAY (glass elements, fixed outside carousel) ──
+            VStack {
+                // Top: page counter + title card
+                topOverlay
+                    .padding(.top, 60)
+
+                Spacer()
+
+                // Bottom: Back / Next buttons
+                bottomNavigation
+                    .padding(.bottom, 40)
             }
-            .padding(.bottom, 30)
+            .padding(.horizontal, 20)
         }
         .ignoresSafeArea()
     }
-    
-    var config: PageCurlCarouselConfig{
-        return .init(
-            curlRadius: 80,
-        //  curlCenter: .init(x: 1, y: 1)
-        )
+
+    // MARK: - Top Overlay (counter + title card)
+    private var topOverlay: some View {
+        VStack(spacing: 12) {
+            // Page counter
+            Text("\(currentPage + 1)/\(pages.count)")
+                .font(.bodySmall(weight: .bold))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+
+            // Glass title card
+            Text(pages[currentPage].title)
+                .font(.heading3())
+                .foregroundColor(.nomiTextPrimary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+                .background(.ultraThinMaterial)         // ← GLASS EFFECT
+                .clipShape(RoundedRectangle(cornerRadius: 32))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 32)
+                        .stroke(.white.opacity(0.4), lineWidth: 1)   // subtle glass edge
+                )
+                .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+        }
     }
 
-    // MARK: - Disabled (kept for future use)
-    // Constrain carousel ke aspect ratio fixed (411×800) — useful kalau mau letterboxed view
-    // Pakai: .frame(width: pageSize(geo.size).width, height: pageSize(geo.size).height)
-    //
-    // func pageSize(_ viewSize: CGSize) -> CGSize {
-    //     let actualSize = CGSize(width: 411, height: 800)
-    //
-    //     // Calculate aspect ratios
-    //     let widthFactor = viewSize.width / actualSize.width
-    //     let heightFactor = viewSize.height / actualSize.height
-    //     let aspectScale = min(widthFactor, heightFactor)
-    //
-    //     return CGSize(
-    //         width: actualSize.width * aspectScale,
-    //         height: actualSize.height * aspectScale
-    //     )
-    // }
+    // MARK: - Bottom Navigation (Back / Next glass buttons)
+    private var bottomNavigation: some View {
+        HStack {
+            glassButton(
+                label: "Back",
+                icon: "chevron.left",
+                iconLeading: true,
+                isEnabled: canGoBack
+            ) {
+                goToPage(currentPage - 1)
+            }
+
+            Spacer()
+
+            glassButton(
+                label: "Next",
+                icon: "chevron.right",
+                iconLeading: false,
+                isEnabled: canGoNext
+            ) {
+                goToPage(currentPage + 1)
+            }
+        }
+    }
+
+    // MARK: - Glass Button
+    @ViewBuilder
+    private func glassButton(
+        label: String,
+        icon: String,
+        iconLeading: Bool,
+        isEnabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if iconLeading {
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .bold))
+                    Text(label)
+                        .font(.heading3())
+                } else {
+                    Text(label)
+                        .font(.heading3())
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .bold))
+                }
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 14)
+            .background(.ultraThinMaterial.opacity(0.9))    // ← GLASS EFFECT
+            .background(Color.black.opacity(0.3))           // dim layer behind glass biar text putih kontras
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(.white.opacity(0.4), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.2), radius: 6, y: 3)
+            .opacity(isEnabled ? 1.0 : 0.4)
+        }
+        .disabled(!isEnabled)
+    }
+
+    // MARK: - Action
+    private func goToPage(_ index: Int) {
+        guard index >= 0, index < pages.count else { return }
+        withAnimation(.easeInOut(duration: 1.2)) {        // slow page-flip feel
+            currentPage = index
+        }
+    }
+
+    // MARK: - PageCurl Config
+    var config: PageCurlCarouselConfig {
+        .init(curlRadius: 120)
+    }
 }
 
 #Preview {
