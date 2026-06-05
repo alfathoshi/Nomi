@@ -11,7 +11,17 @@ struct WideButton: View {
 
     let title: String
     let icon: String?
+    let background: Color?
+    let foreground: Color?
     let action: () -> Void
+    
+    init(title: String, icon: String? = nil, background: Color? = nil, foreground: Color? = nil, action: @escaping () -> Void) {
+        self.title = title
+        self.icon = icon
+        self.background = background
+        self.foreground = foreground
+        self.action = action
+    }
 
     var body: some View {
 
@@ -20,15 +30,15 @@ struct WideButton: View {
             HStack(spacing: 8) {
                 Text(title)
                     .font(.button())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(foreground  ?? .white)
                 if let icon {
                     Image(systemName: icon)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(foreground ?? .white)
                 }
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.nomiPrimary)
+            .background(background ?? Color.nomiPrimary)
             .clipShape(
                 RoundedRectangle(
                     cornerRadius: 24

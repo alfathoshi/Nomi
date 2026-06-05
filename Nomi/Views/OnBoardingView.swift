@@ -40,7 +40,7 @@ struct OnBoardingView: View {
                     .font(.heading3())
                     .padding(.bottom, 16)
                 
-                Text("Hello there! 👋\nI'm Luna")
+                Text("Hello there! 👋\nI'm Moni")
                     .font(.heading2())
                     .padding(.bottom, 2)
                 
@@ -70,9 +70,9 @@ struct OnBoardingView: View {
                         title: "Parents can check in too",
                         subtitle: "A special area just for grown-ups",
                         color: .surfaceAccent,
-                        iconColor: .accentSoft,)
+                        iconColor: .accentSoft,
+                    )
                 }
-                
                 
                 Spacer()
                 
