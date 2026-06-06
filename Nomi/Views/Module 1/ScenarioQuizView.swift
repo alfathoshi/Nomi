@@ -62,8 +62,8 @@ struct ScenarioQuizView: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToTrustContract) {
-//                Level5ExplanationView()
-//                    .navigationBarBackButtonHidden(true)
+                Level5ExplanationView()
+                    .navigationBarBackButtonHidden(true)
             }
             .ignoresSafeArea()
             .toolbar(.hidden, for: .navigationBar)

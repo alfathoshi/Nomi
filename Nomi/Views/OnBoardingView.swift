@@ -9,6 +9,9 @@ import SwiftUI
 
 struct OnBoardingView: View {
     @State private var goToProfile = false
+    private var canStart: Bool {
+        true
+    }
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
@@ -40,11 +43,11 @@ struct OnBoardingView: View {
                     .font(.heading3())
                     .padding(.bottom, 16)
                 
-                Text("Hello there! 👋\nI'm Moni")
+                Text("Hello there! 👋\nI'm Nomi")
                     .font(.heading2())
                     .padding(.bottom, 2)
                 
-                Text("I'm here to help you learn about your body, feelings, and how to stay safe in a fun way!")
+                Text("I'm here to help your child learn about their body, feelings, and how to stay safe in a fun way!")
                     .font(.bodySmall())
                     .foregroundColor(.textSecondary)
                     .padding(.bottom, 20)
@@ -53,14 +56,14 @@ struct OnBoardingView: View {
                     FeatureCard(
                         icon: "gamecontroller.fill",
                         title: "Learn through stories & games",
-                        subtitle: "Interactive lessons made just for you",
+                        subtitle: "Interactive lessons made just for your child",
                         color: .surfaceTint,
                         iconColor: .textSecondary,
                     )
                     FeatureCard(
                         icon: "star.fill",
                         title: "Earn coins & badges",
-                        subtitle: "Get rewarded as you learn",
+                        subtitle: "Your child gets rewarded for every level completed",
                         color: .surfaceTint,
                         iconColor: .accent,
                     )
@@ -82,6 +85,8 @@ struct OnBoardingView: View {
                 ) {
                     goToProfile = true
                 }
+                .disabled(!canStart)
+                .opacity(canStart ? 1 : 0.5)
                 .navigationDestination(isPresented: $goToProfile) {
                     ProfileSetupView()
                 }
