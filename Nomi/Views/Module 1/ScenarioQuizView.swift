@@ -12,6 +12,7 @@ struct ScenarioQuizView: View {
     private let scenarioData = ScenarioData()
     private let correctAnswers: [Bool] = [false, true]
     private let speechSynthesizer = AVSpeechSynthesizer()
+    @State private var audioPlayer: AVAudioPlayer?
     
     @State private var currentIndex = 0
     @State private var shakeAmount: CGFloat = 0
@@ -77,6 +78,7 @@ struct ScenarioQuizView: View {
             withAnimation(.easeInOut(duration: 0.45)) {
                 shakeAmount += 1
             }
+            playWrongAnswerSound()
         }
     }
     
@@ -88,6 +90,24 @@ struct ScenarioQuizView: View {
         }
     }
     
+    private func playWrongAnswerSound() {
+        guard let url = Bundle.main.url(forResource: "wrong-answer", withExtension: "mp3") else {
+            print("Wrong answer audio not found")
+            return
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play wrong answer audio: \(error.localizedDescription)")
+        }
+    }
+
     private func playWrongAnswerVoice() {
         let voice = AVSpeechSynthesisVoice(
             identifier: "com.apple.voice.enhanced.en-US.Samantha"
