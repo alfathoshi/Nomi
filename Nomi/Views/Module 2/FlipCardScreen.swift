@@ -17,30 +17,31 @@ struct FlipCardScreen: View {
             frontLabel: "Boy's Private\nPart",
             frontEmoji: "🩲",
             realNames: ["Penis"],
-            alternativeName: "Burung"
+            alternativeName: "Pee - pee"
         ),
         FlipCard(
             frontLabel: "Girl's Private\nPart",
             frontEmoji: "👙",
             realNames: ["Vagina"],
-            alternativeName: nil
+            alternativeName: "Miss v or Nunu"
         ),
         FlipCard(
             frontLabel: "Upper Private\nPart",
             frontEmoji: "👕",
-            realNames: ["Chest", "Nipple"],
+            realNames: ["Chest","or","Nipple"],
             alternativeName: nil
         ),
         FlipCard(
             frontLabel: "Back Private\nPart",
             frontEmoji: "🍑",
-            realNames: ["Buttocks", "Bottom"],
-            alternativeName: nil
+            realNames: ["Buttocks", "or" ,"Bottom"],
+            alternativeName: "Bum - bum"
         ),
     ]
 
     @State private var currentIndex = 0
-    @State private var showCompletionPopup = false       // ← NEW: track popup visibility
+    @State private var showCompletionPopup = false
+    @State private var showConfetti = false
 
     private var currentCard: FlipCard {
         cards[currentIndex]
@@ -48,7 +49,6 @@ struct FlipCardScreen: View {
 
     var body: some View {
         ZStack {
-            // Faded background
             Image(.storyBackground)
                 .resizable()
                 .scaledToFill()
@@ -60,7 +60,6 @@ struct FlipCardScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
-                // Title
                 Text("Doctor's Words")
                     .font(.heading1(size: 36))
                     .foregroundColor(.nomiTextPrimary)
@@ -73,17 +72,16 @@ struct FlipCardScreen: View {
                 Spacer()
             }
 
-            // Completion popup overlay
             if showCompletionPopup {
                 completionPopup
             }
         }
     }
 
-    // MARK: - Card Stack
+    // card stack
     private var cardStack: some View {
         ZStack {
-            // Background depth cards (decorative, static)
+            
             RoundedRectangle(cornerRadius: cardCornerRadius)
                 .fill(.white)
                 .frame(width: cardWidth, height: cardHeight)
@@ -98,8 +96,6 @@ struct FlipCardScreen: View {
                 .offset(x: 6, y: 6)
                 .rotationEffect(.degrees(2))
 
-            // Active card — punya flip state sendiri
-            // .id(currentIndex) → setiap card baru = view baru = state fresh
             FlippableCardView(card: currentCard, onNext: nextCard)
                 .id(currentIndex)
                 .transition(.asymmetric(
@@ -109,34 +105,29 @@ struct FlipCardScreen: View {
         }
     }
 
-    // MARK: - Action — langsung shuffle tanpa flip animation
     private func nextCard() {
-        // Kalau ini card terakhir → show popup, bukan loop ke card pertama
+        
         if currentIndex >= cards.count - 1 {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                 showCompletionPopup = true
             }
         } else {
-            // Belum terakhir → shuffle ke card berikutnya
             withAnimation(.easeInOut(duration: 0.5)) {
                 currentIndex += 1
             }
         }
     }
 
-    // MARK: - Completion Popup (muncul setelah card terakhir)
     private var completionPopup: some View {
         ZStack {
-            // Dim backdrop
+
             Color.black.opacity(0.4)
                 .ignoresSafeArea()
                 .transition(.opacity)
                 .onTapGesture {
-                    // Optional: dismiss on background tap
                     dismissPopup()
                 }
 
-            // Popup card
             VStack(spacing: 24) {
                 Text("Level 2 Complete")
                     .font(.heading1())
@@ -172,33 +163,41 @@ struct FlipCardScreen: View {
             .padding(.horizontal, 32)
             .shadow(color: .black.opacity(0.2), radius: 20, y: 10)
             .transition(.scale(scale: 0.7).combined(with: .opacity))
+
+            if showConfetti {
+                LottieWrapper(fileName: "confetti", loop: true)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
+        }
+        .task {
+            showConfetti = true
+            try? await Task.sleep(for: .seconds(6))
+            showConfetti = false
         }
     }
 
     private func dismissPopup() {
         withAnimation(.easeInOut(duration: 0.3)) {
             showCompletionPopup = false
-            currentIndex = 0   // reset ke card pertama (atau navigate ke next screen)
+            currentIndex = 0
         }
     }
 }
 
-// MARK: - Flippable Card View (encapsulates flip state)
+// flippable
 struct FlippableCardView: View {
     let card: FlipCard
     let onNext: () -> Void
 
-    // ← Flip state isolated per card instance
-    //   New card = fresh state = isFlipped: false (front)
     @State private var isFlipped = false
+    @State private var isPulsing = false
 
     var body: some View {
         ZStack {
-            // FRONT
             frontCard
                 .opacity(isFlipped ? 0 : 1)
 
-            // BACK (pre-rotated 180° biar text readable saat flipped)
             backCard
                 .rotation3DEffect(
                     .degrees(180),
@@ -213,7 +212,6 @@ struct FlippableCardView: View {
         .animation(.easeInOut(duration: 0.8), value: isFlipped)
     }
 
-    // MARK: - Front (purple, tap to flip)
     private var frontCard: some View {
         Button {
             isFlipped = true
@@ -245,7 +243,6 @@ struct FlippableCardView: View {
         .buttonStyle(CardButtonStyle())
     }
 
-    // MARK: - Back (white, shows result + next button)
     private var backCard: some View {
         ZStack {
             RoundedRectangle(cornerRadius: cardCornerRadius)
@@ -255,11 +252,6 @@ struct FlippableCardView: View {
                 Spacer()
 
                 ForEach(card.realNames.indices, id: \.self) { i in
-                    if i > 0 {
-                        Text("or")
-                            .font(.bodyMedium())
-                            .foregroundColor(.nomiTextSecondary)
-                    }
                     Text(card.realNames[i])
                         .font(.heading1())
                         .foregroundColor(.nomiPrimary)
@@ -299,18 +291,24 @@ struct FlippableCardView: View {
         .shadow(color: .black.opacity(0.15), radius: 10, y: 6)
     }
 
-    // MARK: - Tap Indicator
+
     private var tapIndicator: some View {
         ZStack {
             Circle()
-                .fill(Color.white)
-                .frame(width: 40, height: 40)
+                .fill(Color.white.opacity(0.2))
+                .frame(width: 80, height: 80)
+                .scaleEffect(isPulsing ? 1.15 : 1.0)
+                .opacity(isPulsing ? 0.3 : 0.8)
+
             Circle()
                 .fill(Color.white.opacity(0.2))
                 .frame(width: 60, height: 60)
+                .scaleEffect(isPulsing ? 1.1 : 1.0)
+                .opacity(isPulsing ? 0.4 : 0.9)
+
             Circle()
-                .fill(Color.white.opacity(0.2))
-                .frame(width: 80, height: 80)
+                .fill(Color.white)
+                .frame(width: 40, height: 40)
 
             VStack() {
                 Image(systemName: "hand.tap.fill")
@@ -323,10 +321,14 @@ struct FlippableCardView: View {
                     .offset(y:-2)
             }
         }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                isPulsing = true
+            }
+        }
     }
 }
 
-// MARK: - Custom Shuffle Transition
 struct ShuffleAwayModifier: ViewModifier {
     var progress: Double
 

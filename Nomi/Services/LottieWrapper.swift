@@ -10,15 +10,16 @@ import SwiftUI
 import DotLottie
 
 struct LottieWrapper: UIViewRepresentable {
-    
+
     let fileName: String
-    
+    var loop: Bool = false
+
     func makeUIView(context: Context) -> UIView {
         let container = UIView()
-        
+
         let animationView = DotLottieAnimation(
             fileName: fileName,
-            config: AnimationConfig()
+            config: AnimationConfig(autoplay: true, loop: loop)
         )
         
         let playerView: UIView = animationView.view() as UIView
