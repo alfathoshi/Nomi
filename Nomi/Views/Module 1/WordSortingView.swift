@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import AVFoundation
 
 struct WordSortingView: View {
     
@@ -31,6 +32,7 @@ struct WordSortingView: View {
     @State private var initialBankOrder: [UUID] = []
     @State private var initialBankPositions: [UUID: CGPoint] = [:]
     @State private var initialBankRotations: [UUID: Double] = [:]
+    @State private var audioPlayer: AVAudioPlayer?
     
     let screenSize = UIScreen.main.bounds.size
     
@@ -133,6 +135,7 @@ struct WordSortingView: View {
 
             if expectedCategory != category {
                 triggerWrongDropFeedback(for: category)
+                playWrongAnswerSound()
 
                 removeWordFromAllOrders(wordID)
                 appendWord(wordID, to: .unassigned)
@@ -300,6 +303,24 @@ struct WordSortingView: View {
         }
     }
     
+    private func playWrongAnswerSound() {
+        guard let url = Bundle.main.url(forResource: "wrong-answer", withExtension: "mp3") else {
+            print("Wrong answer audio not found")
+            return
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play wrong answer audio: \(error.localizedDescription)")
+        }
+    }
+
     private func triggerWrongDropFeedback(for category: WordCategory) {
         let isPrivate = category == .doctors
         
