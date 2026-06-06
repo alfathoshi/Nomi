@@ -55,36 +55,43 @@ struct LandscapeStoryScreen: View {
     private var canGoNext: Bool { currentIndex < pages.count }
 
     var body: some View {
-        NavigationStack {
-            GeometryReader { geo in
-                ZStack {
-                    PageCurlCarousel(config: config, currentPage: $currentIndex) { size in
-                        ForEach(0..<pages.count, id: \.self) { index in
-                            ZStack {
-                                Image(pages[index].imageName)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: size.width, height: size.height)
-                                    .clipped()
-                                
-                                uiOverlay
-                            }
+        GeometryReader { geo in
+            ZStack {
+                PageCurlCarousel(config: config, currentPage: $currentIndex) { size in
+                    ForEach(0..<pages.count, id: \.self) { index in
+                        ZStack {
+                            Image(pages[index].imageName)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: size.width, height: size.height)
+                                .clipped()
+                            
+                            uiOverlay
                         }
                     }
-                    .frame(width: geo.size.width, height: geo.size.height)
                 }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
-            .ignoresSafeArea()
-            .onAppear {
+        }
+        .ignoresSafeArea()
+        .navigationDestination(isPresented: $navigateToFlipCard) {
+            DoctorWordsScreen()
+                .navigationBarBackButtonHidden(true)
+                .onAppear {
 #if os(iOS)
-                OrientationManager.shared.lock(to: .landscape)
+                    OrientationManager.shared.lock(to: .portrait)
 #endif
-            }
-            .onDisappear {
+                }
+        }
+        .onAppear {
 #if os(iOS)
-                OrientationManager.shared.lock(to: .portrait)
+            OrientationManager.shared.lock(to: .landscape)
 #endif
-            }
+        }
+        .onDisappear {
+#if os(iOS)
+            OrientationManager.shared.lock(to: .portrait)
+#endif
         }
     }
 
@@ -124,15 +131,6 @@ struct LandscapeStoryScreen: View {
                         goToPage(currentIndex + 1)
                     }
                 }
-            }
-            .navigationDestination(isPresented: $navigateToFlipCard) {
-                DoctorWordsScreen()
-                    .navigationBarBackButtonHidden(true)
-                    .onAppear {
-#if os(iOS)
-                        OrientationManager.shared.lock(to: .portrait)
-#endif
-                    }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             .padding(20)
