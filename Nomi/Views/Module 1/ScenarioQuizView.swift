@@ -17,6 +17,7 @@ struct ScenarioQuizView: View {
     @State private var currentIndex = 0
     @State private var shakeAmount: CGFloat = 0
     @State private var navigateToTrustContract: Bool = false
+    @State private var showCelebration = false
     
     var body: some View {
         NavigationStack {
@@ -59,6 +60,22 @@ struct ScenarioQuizView: View {
                     .padding(.bottom, 44)
                     }
                     .frame(width: geo.size.width, height: geo.size.height)
+
+                    if showCelebration {
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                finishCelebration()
+                            }
+
+                        LottieWrapper(fileName: "confetti")
+                            .allowsHitTesting(false)
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                                    finishCelebration()
+                                }
+                            }
+                    }
                 }
             }
             .navigationDestination(isPresented: $navigateToTrustContract) {
@@ -73,7 +90,8 @@ struct ScenarioQuizView: View {
         let correctAnswer = correctAnswers[currentIndex]
 
         if isSafeAnswer == correctAnswer {
-            goToNextScenario()
+            playCorrectAnswerSound()
+            showCelebration = true
         } else {
             withAnimation(.easeInOut(duration: 0.45)) {
                 shakeAmount += 1
@@ -82,14 +100,24 @@ struct ScenarioQuizView: View {
         }
     }
     
-    private func goToNextScenario() {
-        if currentIndex < scenarioData.scenarios.count - 1 {
-            currentIndex += 1
-        } else {
-            navigateToTrustContract = true
+    private func playCorrectAnswerSound() {
+        guard let url = Bundle.main.url(forResource: "correct-answer", withExtension: "mp3") else {
+            print("Correct answer audio not found")
+            return
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play correct answer audio: \(error.localizedDescription)")
         }
     }
-    
+
     private func playWrongAnswerSound() {
         guard let url = Bundle.main.url(forResource: "wrong-answer", withExtension: "mp3") else {
             print("Wrong answer audio not found")
@@ -106,6 +134,20 @@ struct ScenarioQuizView: View {
         } catch {
             print("Failed to play wrong answer audio: \(error.localizedDescription)")
         }
+    }
+
+    private func goToNextScenario() {
+        if currentIndex < scenarioData.scenarios.count - 1 {
+            currentIndex += 1
+        } else {
+            navigateToTrustContract = true
+        }
+    }
+
+    private func finishCelebration() {
+        guard showCelebration else { return }
+        showCelebration = false
+        goToNextScenario()
     }
 
     private func playWrongAnswerVoice() {
