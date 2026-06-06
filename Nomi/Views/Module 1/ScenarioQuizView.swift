@@ -12,9 +12,11 @@ struct ScenarioQuizView: View {
     private let scenarioData = ScenarioData()
     private let correctAnswers: [Bool] = [false, true]
     private let speechSynthesizer = AVSpeechSynthesizer()
+    @State private var audioPlayer: AVAudioPlayer?
     
     @State private var currentIndex = 0
     @State private var shakeAmount: CGFloat = 0
+    @State private var navigateToTrustContract: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -59,6 +61,10 @@ struct ScenarioQuizView: View {
                     .frame(width: geo.size.width, height: geo.size.height)
                 }
             }
+            .navigationDestination(isPresented: $navigateToTrustContract) {
+//                Level5ExplanationView()
+//                    .navigationBarBackButtonHidden(true)
+            }
             .ignoresSafeArea()
             .toolbar(.hidden, for: .navigationBar)
         }
@@ -72,16 +78,36 @@ struct ScenarioQuizView: View {
             withAnimation(.easeInOut(duration: 0.45)) {
                 shakeAmount += 1
             }
-//            playWrongAnswerVoice()
+            playWrongAnswerSound()
         }
     }
     
     private func goToNextScenario() {
         if currentIndex < scenarioData.scenarios.count - 1 {
             currentIndex += 1
+        } else {
+            navigateToTrustContract = true
         }
     }
     
+    private func playWrongAnswerSound() {
+        guard let url = Bundle.main.url(forResource: "wrong-answer", withExtension: "mp3") else {
+            print("Wrong answer audio not found")
+            return
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play wrong answer audio: \(error.localizedDescription)")
+        }
+    }
+
     private func playWrongAnswerVoice() {
         let voice = AVSpeechSynthesisVoice(
             identifier: "com.apple.voice.enhanced.en-US.Samantha"
