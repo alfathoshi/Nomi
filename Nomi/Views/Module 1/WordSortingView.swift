@@ -45,6 +45,9 @@ struct WordSortingView: View {
             word.category == correctCategory(for: word)
         }
     }
+
+    @State private var navigateToScenarioQuiz = false
+
     
     var body: some View {
         NavigationStack {
@@ -118,6 +121,7 @@ struct WordSortingView: View {
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                             showCelebration = false
+                            navigateToScenarioQuiz = true
                         }
                     }
                 }
@@ -127,6 +131,10 @@ struct WordSortingView: View {
                 guard !didPlaceInitialWords, newFrame.width > 0, newFrame.height > 0 else { return }
                 placeInitialWordsInWordBank()
                 didPlaceInitialWords = true
+            }
+            .navigationDestination(isPresented: $navigateToScenarioQuiz) {
+                Level4ExplanationView()
+                    .navigationBarBackButtonHidden(true)
             }
         }
     }
