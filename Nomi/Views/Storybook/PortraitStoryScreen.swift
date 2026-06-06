@@ -30,7 +30,6 @@ struct PortraitStoryScreen: View {
 
     var body: some View {
         ZStack {
-            // ── PAGE CURL CAROUSEL (background) ──
             GeometryReader { geo in
                 PageCurlCarousel(config: config, currentPage: $currentPage) { size in
                     ForEach(0..<pages.count, id: \.self) { index in

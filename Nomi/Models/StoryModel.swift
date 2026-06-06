@@ -11,9 +11,10 @@ import SwiftUI
 struct StoryPage: Identifiable {
     let id = UUID()
     let image: ImageResource
-    let title: String
+    var title: String? = nil
     let content: Text
-    let canReadAloud: Bool
+    var audioName: String? = nil
+    var canReadAloud: Bool = false
 }
 
 struct StoryBook: Identifiable {
