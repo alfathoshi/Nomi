@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct Level3ExplanationView: View {
     let highlight1 = Text("Private Part")
@@ -15,6 +16,7 @@ struct Level3ExplanationView: View {
         .foregroundColor(.nomiPrimary)
         .font(.heading3())
     @State private var navigateToWordSorting = false
+    @State private var audioPlayer: AVAudioPlayer?
     var body: some View {
         NavigationStack {
             LevelExplanationScreen(
@@ -28,11 +30,36 @@ struct Level3ExplanationView: View {
             ) {
                 navigateToWordSorting.toggle()
             }
+            .onAppear {
+                playNarration(named: "Level-3-Explanation", fileExtension: "mp3")
+            }
+            .onDisappear {
+                stopNarration()
+            }
             .navigationDestination(isPresented: $navigateToWordSorting) {
                 WordSortingView()
                     .navigationBarBackButtonHidden(true)
             }
         }
+    }
+    private func playNarration(named fileName: String, fileExtension: String) {
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
+            print("Narration audio not found: \(fileName).\(fileExtension)")
+            return
+        }
+
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play narration audio: \(error.localizedDescription)")
+        }
+    }
+
+    private func stopNarration() {
+        audioPlayer?.stop()
+        audioPlayer = nil
     }
 }
 

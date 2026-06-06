@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct Level4ExplanationView: View {
     let highlight1 = Text("SAFE")
@@ -15,6 +16,7 @@ struct Level4ExplanationView: View {
         .foregroundColor(.nomiPrimary)
         .font(.heading3())
     @State private var navigateToScenarioQuiz = false
+    @State private var audioPlayer: AVAudioPlayer?
     var body: some View {
         NavigationStack {
             LevelExplanationScreen(
@@ -27,11 +29,36 @@ struct Level4ExplanationView: View {
             ) {
                 navigateToScenarioQuiz.toggle()
             }
+            .onAppear {
+                playNarration(named: "Level-4-Explanation", fileExtension: "mp3")
+            }
+            .onDisappear {
+                stopNarration()
+            }
             .navigationDestination(isPresented: $navigateToScenarioQuiz) {
                 ScenarioQuizView()
                     .navigationBarBackButtonHidden(true)
             }
         }
+    }
+    private func playNarration(named fileName: String, fileExtension: String) {
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
+            print("Narration audio not found: \(fileName).\(fileExtension)")
+            return
+        }
+
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play narration audio: \(error.localizedDescription)")
+        }
+    }
+
+    private func stopNarration() {
+        audioPlayer?.stop()
+        audioPlayer = nil
     }
 }
 

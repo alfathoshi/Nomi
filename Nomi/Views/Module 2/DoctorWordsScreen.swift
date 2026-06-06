@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 let screenSize = UIScreen.main.bounds.size
 
 struct DoctorWordsScreen: View {
     @State private var navigateToFlipCard = false
+    @State private var audioPlayer: AVAudioPlayer?
     var body: some View {
         let highlight = Text("\"The Doctor Words\"")
             .foregroundColor(.nomiPrimary)
@@ -71,11 +73,42 @@ struct DoctorWordsScreen: View {
                     .padding(.bottom, 48)
                 }
             }
+            .onAppear {
+                playNarration(named: "Level-2-Explanation", fileExtension: "mp3")
+            }
+            .onDisappear {
+                stopNarration()
+            }
             .navigationDestination(isPresented: $navigateToFlipCard) {
                 FlipCardScreen()
                     .navigationBarBackButtonHidden(true)
             }
         }
+    }
+    private func playNarration(named fileName: String, fileExtension: String) {
+        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
+            print("Narration audio not found: \(fileName).\(fileExtension)")
+            return
+        }
+
+        print("Narration audio found: \(url.lastPathComponent)")
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play narration audio: \(error.localizedDescription)")
+        }
+    }
+
+    private func stopNarration() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+        try? AVAudioSession.sharedInstance().setActive(false)
     }
 }
 

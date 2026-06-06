@@ -12,10 +12,12 @@ struct ContentView: View {
     @AppStorage("hasSeenSplash") private var hasSeenSplash = false
     
     var body: some View {
-        if hasSeenSplash {
-            HomeScreen()
-        } else {
-            SplashScreen()
+        Group {
+            if hasSeenSplash {
+                HomeScreen()
+            } else {
+                SplashScreen()
+            }
         }
     }
 }
