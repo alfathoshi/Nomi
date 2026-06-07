@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ProfileSetupView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var name = ""
     @State private var selectedAge: Int? = nil
     @State private var selectedAvatar: String? = nil
@@ -123,6 +125,7 @@ struct ProfileSetupView: View {
                     title: "Continue",
                     icon: "arrow.forward")
                 {
+                    saveProfile()
                     goToHomeScreen = true
                 }
                 .disabled(!isFormComplete)
@@ -143,8 +146,32 @@ struct ProfileSetupView: View {
             //.navigationBarTitleDisplayMode(.inline)
         }
     }
+    private func saveProfile() {
+        guard let selectedAge,
+              let selectedAvatar,
+              let selectedGender else { return }
+
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return }
+
+        let profile = ChildProfile(
+            avatar: selectedAvatar,
+            name: trimmedName,
+            age: selectedAge,
+            gender: selectedGender
+        )
+
+        modelContext.insert(profile)
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save child profile: \(error.localizedDescription)")
+        }
+    }
 }
 
 #Preview {
     ProfileSetupView()
+        .modelContainer(for: ChildProfile.self, inMemory: true)
 }
