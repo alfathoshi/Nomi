@@ -139,7 +139,7 @@ struct FlipCardScreen: View {
                     .scaledToFit()
                     .frame(height: 200)
 
-                Button(action: dismissPopup) {
+                Button(action: {navigateToWordSorting = true}) {
                     HStack(spacing: 8) {
                         Text("Next Level")
                             .font(.heading3())

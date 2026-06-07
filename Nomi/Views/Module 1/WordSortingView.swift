@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import AVFoundation
 
 struct WordSortingView: View {
     
@@ -31,12 +32,22 @@ struct WordSortingView: View {
     @State private var initialBankOrder: [UUID] = []
     @State private var initialBankPositions: [UUID: CGPoint] = [:]
     @State private var initialBankRotations: [UUID: Double] = [:]
+    @State private var audioPlayer: AVAudioPlayer?
     
     let screenSize = UIScreen.main.bounds.size
     
     private var isFinishDisabled: Bool {
         words.contains { $0.category == .unassigned }
     }
+
+    private var isSortingCorrect: Bool {
+        words.allSatisfy { word in
+            word.category == correctCategory(for: word)
+        }
+    }
+
+    @State private var navigateToScenarioQuiz = false
+
     
     var body: some View {
         NavigationStack {
@@ -72,7 +83,7 @@ struct WordSortingView: View {
                         .frame(height: 180)
                     
                     WideButton(title: "Finish Sorting", icon: "flag.pattern.checkered") {
-                        showCelebration = true
+                        checkSortingResult()
                     }
                     .disabled(isFinishDisabled)
                     .saturation(isFinishDisabled ? 0.1 : 1)
@@ -110,6 +121,7 @@ struct WordSortingView: View {
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                             showCelebration = false
+                            navigateToScenarioQuiz = true
                         }
                     }
                 }
@@ -120,9 +132,24 @@ struct WordSortingView: View {
                 placeInitialWordsInWordBank()
                 didPlaceInitialWords = true
             }
+            .navigationDestination(isPresented: $navigateToScenarioQuiz) {
+                Level4ExplanationView()
+                    .navigationBarBackButtonHidden(true)
+            }
         }
     }
     
+    private func checkSortingResult() {
+        if isSortingCorrect {
+            playCorrectAnswerSound()
+            showCelebration = true
+        } else {
+            playWrongAnswerSound()
+            triggerWrongDropFeedback(for: .doctors)
+            triggerWrongDropFeedback(for: .strangers)
+        }
+    }
+
     private func snapPosition(for wordID: UUID, category: WordCategory) -> CGPoint {
         guard let wordIndex = words.firstIndex(where: { $0.id == wordID }) else {
             return .zero
@@ -133,6 +160,7 @@ struct WordSortingView: View {
 
             if expectedCategory != category {
                 triggerWrongDropFeedback(for: category)
+                playWrongAnswerSound()
 
                 removeWordFromAllOrders(wordID)
                 appendWord(wordID, to: .unassigned)
@@ -300,6 +328,42 @@ struct WordSortingView: View {
         }
     }
     
+    private func playCorrectAnswerSound() {
+        guard let url = Bundle.main.url(forResource: "correct-answer", withExtension: "mp3") else {
+            print("Correct answer audio not found")
+            return
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play correct answer audio: \(error.localizedDescription)")
+        }
+    }
+
+    private func playWrongAnswerSound() {
+        guard let url = Bundle.main.url(forResource: "wrong-answer", withExtension: "mp3") else {
+            print("Wrong answer audio not found")
+            return
+        }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play wrong answer audio: \(error.localizedDescription)")
+        }
+    }
+
     private func triggerWrongDropFeedback(for category: WordCategory) {
         let isPrivate = category == .doctors
         
