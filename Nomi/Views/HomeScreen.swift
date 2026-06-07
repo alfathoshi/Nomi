@@ -6,14 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeScreen: View {
+    @Query private var profiles: [ChildProfile]
     let topics: [TopicData] = [
         TopicData(number: 1, title: "Body Parts & Boundaries",     characterImage: "HomeGirl", currentStep: 2, totalSteps: 5, isLocked: false),
         TopicData(number: 2, title: "Personal Hygiene",            characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
         TopicData(number: 3, title: "Consent & Saying Yes or No",  characterImage: "HomeGirl", currentStep: 0, totalSteps: 5, isLocked: true),
         TopicData(number: 4, title: "Trusted Adults",              characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
     ]
+    private var profile: ChildProfile? {
+        profiles.first
+    }
     @State private var navigateToStoryBook = false
     var body: some View {
         
@@ -33,10 +38,17 @@ struct HomeScreen: View {
                         greetingBubble
                         
                         NavigationLink(destination: ParentZoneView(), label: {
-                            Image(systemName: "person.fill")
-                                .frame(width: 48, height: 48)
-                                .background(Circle().fill(.white))
-                                .padding(.top, 8)
+                            if let avatar = profile?.avatar {
+                                Text(avatar)
+                                    .frame(width: 48, height: 48)
+                                    .background(Circle().fill(.white))
+                                    .clipShape(Circle())
+                            } else {
+                                Image(systemName: "person.fill")
+                                    .frame(width: 48, height: 48)
+                                    .background(Circle().fill(.white))
+                                    .clipShape(Circle())
+                            }
                         }
                         )
                     }
@@ -95,7 +107,7 @@ struct HomeScreen: View {
                 .shadow(radius: 5)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text("Morning, Xatriya")
+                Text("Morning, \(profile?.name ?? "Friend")")
                     .font(.heading2())
                     .foregroundColor(.nomiTextPrimary)
                 
@@ -118,4 +130,5 @@ struct HomeScreen: View {
 
 #Preview {
     HomeScreen()
+        .modelContainer(for: ChildProfile.self, inMemory: true)
 }
