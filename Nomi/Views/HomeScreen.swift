@@ -14,7 +14,7 @@ struct HomeScreen: View {
         TopicData(number: 3, title: "Consent & Saying Yes or No",  characterImage: "HomeGirl", currentStep: 0, totalSteps: 5, isLocked: true),
         TopicData(number: 4, title: "Trusted Adults",              characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
     ]
-
+    @State private var navigateToStoryBook = false
     var body: some View {
         ZStack {
             //background
@@ -42,32 +42,68 @@ struct HomeScreen: View {
                 //mascot
                 Image("NomiHome")
                     .resizable()
-                    .scaledToFit()
-                    .frame(height: 200)
-                    .offset(y: -60)
-                    .shadow(radius: 15)
-                    .zIndex(0)
-
-                //cardlist
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 12) {
-                        ForEach(topics) { topic in
-                            TopicCard(
-                                number: topic.number,
-                                title: topic.title,
-                                characterImage: topic.characterImage,
-                                currentStep: topic.currentStep,
-                                totalSteps: topic.totalSteps,
-                                isLocked: topic.isLocked
-                            )
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .opacity(0.5)
+                //                .brightness(-0.2)
+                
+                VStack(spacing: 0) {
+                    //greeting bubble + avatar
+                    HStack(alignment: .top, spacing: 8) {
+                        greetingBubble
+                        
+                        NavigationLink(destination: ParentZoneView(), label: {
+                            Image(systemName: "person.fill")
+                                .frame(width: 48, height: 48)
+                                .background(Circle().fill(.white))
+                                .padding(.top, 8)
                         }
+                        )
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 30)
+                    .padding(.horizontal, 40)
+                    .zIndex(2)
+                    
+                    //mascot
+                    Image("NomiHome")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 200)
+                        .offset(y: -60)
+                        .shadow(radius: 15)
+                        .zIndex(0)
+                    
+                    //cardlist
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 12) {
+                            ForEach(topics) { topic in
+                                    TopicCard(
+                                        number: topic.number,
+                                        title: topic.title,
+                                        characterImage: topic.characterImage,
+                                        currentStep: topic.currentStep,
+                                        totalSteps: topic.totalSteps,
+                                        isLocked: topic.isLocked
+                                    ) {
+                                        navigateToStoryBook = true
+                                        print("tapped")
+                                    }
+                            
+                                
+                                
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 30)
+                    }
+                    .padding(.top, -90)
+                    .padding(.horizontal, 30)
                 }
-                .padding(.top, -90)
-                .padding(.horizontal, 30)
             }
+            .navigationDestination(isPresented: $navigateToStoryBook) {
+                LandscapeStoryScreen()
+                    .navigationBarBackButtonHidden(true)
+            }
+            .navigationBarBackButtonHidden(true)
         }
     }
 
@@ -77,16 +113,16 @@ struct HomeScreen: View {
             GreetingBubbleShape()
                 .fill(Color.nomiSurfaceTint)
                 .shadow(radius: 5)
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text("Good Morning, Xatriya")
                     .font(.heading2())
                     .foregroundColor(.nomiTextPrimary)
-
+                
                 Text("What do you want to learn?")
                     .font(.bodyLarge())
                     .foregroundColor(.nomiTextPrimary)
-
+                
                 Text("Tap me to know me")
                     .font(.bodyMedium(weight: .bold))
                     .foregroundColor(.nomiPrimary)
