@@ -23,11 +23,31 @@ struct HomeScreen: View {
     @State private var showStoryTransition = false
     let screenSize = UIScreen.main.bounds.size
     var body: some View {
-        
-        NavigationStack {
-            ZStack {
-                //background
-                Image("HomeBg")
+        ZStack {
+            //background
+            Image(.homeBg)
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+//                .opacity(0.5)
+//                .brightness(-0.2)
+
+            VStack(spacing: 0) {
+                //greeting bubble + avatar
+                HStack(alignment: .top, spacing: 8) {
+                    greetingBubble
+
+                    Image(systemName: "person.fill")
+                        .frame(width: 48, height: 48)
+                        .background(Circle().fill(.white))
+                        
+                }
+                .padding(.horizontal, 40)
+                .padding(.top)
+                .zIndex(2)
+
+                //mascot
+                Image("NomiHome")
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
@@ -136,7 +156,7 @@ struct HomeScreen: View {
     private var greetingBubble: some View {
         ZStack {
             GreetingBubbleShape()
-                .fill(Color(red: 0.953, green: 0.937, blue: 0.996))   // #F3EFFE
+                .fill(Color.nomiSurfaceTint)
                 .shadow(radius: 5)
             
             VStack(alignment: .leading, spacing: 4) {
@@ -158,6 +178,34 @@ struct HomeScreen: View {
             .padding(.bottom, 100)
         }
         .aspectRatio(305.0/206.0, contentMode: .fit)
+    }
+    
+    private var greetingBubble: some View {
+        ZStack {
+            GreetingBubbleShape2()
+                .fill(Color.nomiSurfaceTint)
+                .shadow(radius: 5)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Morning, Xatriya")
+                    .font(.heading2())
+                    .foregroundColor(.nomiTextPrimary)
+                
+                Text("What do you want to learn?")
+                    .font(.bodyLarge())
+                    .foregroundColor(.nomiTextPrimary)
+
+                Text("Tap me to know me")
+                    .font(.bodyMedium(weight: .bold))
+                    .foregroundColor(.nomiPrimary)
+                    .padding(.top, 4)
+            }
+            .padding(.horizontal, 10)
+            .padding(.top, 10)
+            .padding(.bottom, 30)
+        }
+        .frame(width: 305, height: 128)
+        .padding(.bottom, 30)
     }
 }
 
