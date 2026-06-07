@@ -27,6 +27,7 @@ struct ContentView: View {
             path = NavigationPath()
             hasSeenSplash = true
         }
+        .modelContainer(for: ChildProfile.self)
     }
 }
 
