@@ -68,7 +68,7 @@ struct TopicCard: View {
                         .font(.heading1())
                         .foregroundColor(.white)
                         .frame(width: 150, height: 40)
-                        .background(Capsule().fill(Color.nomiAccentSoft))
+                        .background(Capsule().fill(Color.nomiAccent))
                         .padding(.bottom)
                         .offset(y:-10)
                 }
@@ -79,10 +79,10 @@ struct TopicCard: View {
             .frame(height: 210)
             .background(
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(.white)
+                    .fill(Color.nomiSurfaceTint)
             )
             .clipShape(RoundedRectangle(cornerRadius: 24))
-            .saturation(isLocked ? 0.3 : 1.0)
+            .saturation(isLocked ? 0.2 : 1.0)
             .shadow(radius: 4, x: 0, y: 4)
         }
         .buttonStyle(CardButtonStyle())
@@ -94,7 +94,7 @@ struct TopicCard: View {
             .font(.heading2(weight: .bold))
             .foregroundColor(.white)
             .frame(width: 50, height: 50)
-            .background(Circle().fill(Color.nomiPrimarySoft))
+            .background(Circle().fill(Color.nomiPrimary))
             .padding(.top, 30)
     }
 
@@ -103,9 +103,9 @@ struct TopicCard: View {
         ZStack {
             // outer ring
             Circle()
-                .stroke(Color.nomiPrimarySoft.opacity(0.2), lineWidth: 4)
+                .stroke(Color.white, lineWidth: 4)
                 .frame(width: 60, height: 60)
-                .shadow(radius: 0.2)
+                .shadow(radius: 0.5)
 
             Circle()
                 .trim(from: 0, to: progressFraction)
@@ -118,10 +118,9 @@ struct TopicCard: View {
 
             // inner solid
             Circle()
-                .fill(Color.nomiPrimarySoft)
+                .fill(Color.nomiPrimary)
                 .frame(width: 50, height: 50)
 
-            // Fraction text — dark purple di atas light bg
             Text("\(currentStep)/\(totalSteps)")
                 .font(.heading2(weight: .bold))
                 .foregroundColor(.white)
@@ -131,7 +130,7 @@ struct TopicCard: View {
     }
 }
 
-// MARK: - Custom Button Style (bouncy tap feedback)
+// Custom Button Style (bouncy tap feedback)
 struct CardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

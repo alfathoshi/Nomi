@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="942px" height="1673px" viewBox="0 0 942 1673" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Graphic</title>
+    <defs>
+        <rect id="path-1" x="0.743426421" y="0.686858168" width="941" height="1670.08914"></rect>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-3">
+            <stop stop-color="#A98ADD" offset="0%"></stop>
+            <stop stop-color="#E6DDF4" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Graphic" stroke="none" fill="none" transform="translate(0.6816, 0.6405)">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Rectangle-10" fill="#7C3AED" fill-rule="evenodd" xlink:href="#path-1"></use>
+        <path d="M516.422858,-49.9062847 C455.442174,44.2194507 455.442174,128.88207 516.422858,204.081574 C607.893884,316.880831 739.448081,217.542209 903.403476,511.691279 C1012.70707,707.790658 1105.84657,619.31909 1182.82198,246.276572 L1055.6068,-107.918857 L516.422858,-49.9062847 Z" id="Path-2" fill="url(#linearGradient-3)" fill-rule="evenodd" opacity="0.25" mask="url(#mask-2)"></path>
+        <path d="M-45.0138665,1116.62743 C-105.994551,1210.75316 -105.994551,1295.41578 -45.0138665,1370.61529 C46.4571597,1483.41454 178.011357,1384.07592 341.966751,1678.22499 C451.270348,1874.32437 544.40985,1785.8528 621.385258,1412.81029 L494.170077,1058.61486 L-45.0138665,1116.62743 Z" id="Path-2" fill="#C9B9E6" fill-rule="evenodd" opacity="0.25" mask="url(#mask-2)" transform="translate(265.3179, 1419.0949) scale(-1, -1) translate(-265.3179, -1419.0949)"></path>
+    </g>
+</svg>

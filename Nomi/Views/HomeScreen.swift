@@ -18,11 +18,11 @@ struct HomeScreen: View {
     var body: some View {
         ZStack {
             //background
-            Image("HomeBg")
+            Image(.homeBg)
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-                .opacity(0.5)
+//                .opacity(0.5)
 //                .brightness(-0.2)
 
             VStack(spacing: 0) {
@@ -33,9 +33,10 @@ struct HomeScreen: View {
                     Image(systemName: "person.fill")
                         .frame(width: 48, height: 48)
                         .background(Circle().fill(.white))
-                        .padding(.top, 8)
+                        
                 }
                 .padding(.horizontal, 40)
+                .padding(.top)
                 .zIndex(2)
 
                 //mascot
@@ -70,15 +71,15 @@ struct HomeScreen: View {
         }
     }
 
-    // MARK: - Greeting bubble
-    private var greetingBubble: some View {
+    // Greeting bubble
+    private var greetingBubbleOld: some View {
         ZStack {
             GreetingBubbleShape()
-                .fill(Color(red: 0.953, green: 0.937, blue: 0.996))   // #F3EFFE
+                .fill(Color.nomiSurfaceTint)
                 .shadow(radius: 5)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Morning, Xatriya")
+                Text("Good Morning, Xatriya")
                     .font(.heading2())
                     .foregroundColor(.nomiTextPrimary)
 
@@ -96,6 +97,34 @@ struct HomeScreen: View {
             .padding(.bottom, 100)
         }
         .aspectRatio(305.0/206.0, contentMode: .fit)
+    }
+    
+    private var greetingBubble: some View {
+        ZStack {
+            GreetingBubbleShape2()
+                .fill(Color.nomiSurfaceTint)
+                .shadow(radius: 5)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Morning, Xatriya")
+                    .font(.heading2())
+                    .foregroundColor(.nomiTextPrimary)
+                
+                Text("What do you want to learn?")
+                    .font(.bodyLarge())
+                    .foregroundColor(.nomiTextPrimary)
+
+                Text("Tap me to know me")
+                    .font(.bodyMedium(weight: .bold))
+                    .foregroundColor(.nomiPrimary)
+                    .padding(.top, 4)
+            }
+            .padding(.horizontal, 10)
+            .padding(.top, 10)
+            .padding(.bottom, 30)
+        }
+        .frame(width: 305, height: 128)
+        .padding(.bottom, 30)
     }
 }
 
