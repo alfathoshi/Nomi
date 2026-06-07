@@ -15,6 +15,8 @@ struct HomeScreen: View {
         TopicData(number: 4, title: "Trusted Adults",              characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
     ]
     @State private var navigateToStoryBook = false
+    @State private var showStoryTransition = false
+    let screenSize = UIScreen.main.bounds.size
     var body: some View {
         
         NavigationStack {
@@ -64,12 +66,9 @@ struct HomeScreen: View {
                                         totalSteps: topic.totalSteps,
                                         isLocked: topic.isLocked
                                     ) {
-                                        navigateToStoryBook = true
+                                        prepareStoryScreen()
                                         print("tapped")
                                     }
-                            
-                                
-                                
                             }
                         }
                         .padding(.horizontal, 16)
@@ -77,6 +76,31 @@ struct HomeScreen: View {
                     }
                     .padding(.top, -90)
                     .padding(.horizontal, 30)
+                }
+
+                if showStoryTransition {
+                    ZStack {
+                        Image(.storyBackground)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(
+                                width: screenSize.width,
+                                height: screenSize.height
+                            )
+                            .clipped()
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .scaleEffect(1.8)
+                                .tint(.white)
+
+                            Text("Preparing your story...")
+                                .font(.heading3())
+                                .foregroundColor(.nomiTextPrimary)
+                        }
+                    }
+                    .zIndex(20)
                 }
             }
             .navigationDestination(isPresented: $navigateToStoryBook) {
@@ -87,6 +111,15 @@ struct HomeScreen: View {
         }
     }
     
+    private func prepareStoryScreen() {
+        showStoryTransition = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            navigateToStoryBook = true
+            showStoryTransition = false
+        }
+    }
+
     // MARK: - Greeting bubble
     private var greetingBubble: some View {
         ZStack {

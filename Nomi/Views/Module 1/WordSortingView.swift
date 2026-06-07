@@ -13,6 +13,7 @@ struct WordSortingView: View {
     
     @State private var words = SortingWordData.words
     @State private var showCelebration = false
+    @State private var showCongratsPopup = false
     @State private var draggingTextID: UUID?
     @State private var isDragging = false
     @State private var isOverTrash = false
@@ -104,13 +105,15 @@ struct WordSortingView: View {
                             onDropToCategory: snapPosition,
                             selectedText: $selectedText,
                         )
-                        .zIndex(draggingTextID == word.id ? 100 : 1)
+                        .zIndex(draggingTextID == word.id ? 30 : 10)
+                        .allowsHitTesting(!showCelebration && !showCongratsPopup)
                     }
                 }
                 if showCelebration {
                     
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
+                        .zIndex(70)
                         .onTapGesture {
                             showCelebration = false
                         }
@@ -121,9 +124,25 @@ struct WordSortingView: View {
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                             showCelebration = false
-                            navigateToScenarioQuiz = true
+                            showCongratsPopup = true
                         }
                     }
+                    .zIndex(80)
+                }
+                if showCongratsPopup {
+                    CongratsPopUp(
+                        title: "Level 3 Complete",
+                        mascotImage: "NomiDoctor",
+                        buttonTitle: "Next Level",
+                        onDismiss: {
+                            showCongratsPopup = false
+                        },
+                        onNext: {
+                            showCongratsPopup = false
+                            navigateToScenarioQuiz = true
+                        }
+                    )
+                    .zIndex(100)
                 }
             }
             .coordinateSpace(name: "sortingArea")

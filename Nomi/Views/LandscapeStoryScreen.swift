@@ -47,13 +47,16 @@ struct LandscapeStoryScreen: View {
     @State private var textSize: TextSize = .medium
     @StateObject private var tts = TTSManager()
     @State private var navigateToFlipCard = false
+    @State private var showCongratsPopup = false
+    @State private var showNextLevelTransition = false
+    @State private var showCelebration = false
 
     var onHome: () -> Void = {}
 
     private var currentPage: StoryPageNew { pages[currentIndex] }
     private var canGoPrev: Bool { currentIndex > 0 }
     private var canGoNext: Bool { currentIndex < pages.count }
-
+    let screenSize = UIScreen.main.bounds.size
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -71,17 +74,101 @@ struct LandscapeStoryScreen: View {
                     }
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
+
+                if showCongratsPopup {
+                    Color.black.opacity(0.35)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showCongratsPopup = false
+                        }
+                        .zIndex(10)
+
+                    VStack(spacing: 20) {
+                        Text("Story Complete")
+                            .font(.heading1())
+                            .foregroundColor(.nomiTextPrimary)
+                            .padding(.top, 24)
+
+                        Image("NomiHome")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 140)
+
+                        Button(action: {
+                            prepareNextScreen()
+                        }) {
+                            HStack(spacing: 8) {
+                                Text("Next Level")
+                                    .font(.heading3())
+                                    .foregroundColor(.white)
+
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 14)
+                            .background(Color.nomiPrimary)
+                            .clipShape(Capsule())
+                        }
+                        .padding(.bottom, 24)
+                    }
+                    .frame(width: min(geo.size.width * 0.42, 420))
+                    .background(Color.nomiSurfaceTint)
+                    .clipShape(RoundedRectangle(cornerRadius: 28))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 28)
+                            .stroke(Color.nomiPrimary.opacity(0.5), lineWidth: 2)
+                    }
+                    .shadow(color: .black.opacity(0.2), radius: 16, y: 8)
+                    .zIndex(11)
+                }
+
+                if showCelebration {
+                    Color.black.opacity(0.25)
+                        .ignoresSafeArea()
+                        .zIndex(12)
+
+                    LottieWrapper(fileName: "confetti")
+                        .zIndex(13)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                                showCelebration = false
+                                showCongratsPopup = true
+                            }
+                        }
+                }
+
+                if showNextLevelTransition {
+                    ZStack {
+                        Image(.storyBackground)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(
+                                width: screenSize.width,
+                                height: screenSize.height
+                            )
+                            .clipped()
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .scaleEffect(1.8)
+                                .tint(.white)
+
+                            Text("Preparing next adventure...")
+                                .font(.heading3())
+                                .foregroundColor(.nomiTextPrimary)
+                        }
+                    }
+                    .zIndex(20)
+                }
             }
         }
         .ignoresSafeArea()
         .navigationDestination(isPresented: $navigateToFlipCard) {
             DoctorWordsScreen()
                 .navigationBarBackButtonHidden(true)
-                .onAppear {
-#if os(iOS)
-                    OrientationManager.shared.lock(to: .portrait)
-#endif
-                }
         }
         .onAppear {
 #if os(iOS)
@@ -126,7 +213,8 @@ struct LandscapeStoryScreen: View {
 
                 navButton(pointsLeft: false, isEnabled: true) {
                     if currentIndex == pages.count - 1 {
-                        navigateToPortraitScreen()
+                        tts.stop()
+                        showCelebration = true
                     } else {
                         goToPage(currentIndex + 1)
                     }
@@ -287,15 +375,20 @@ struct LandscapeStoryScreen: View {
         }
     }
 
-    private func navigateToPortraitScreen() {
+    private func prepareNextScreen() {
         tts.stop()
+        showCongratsPopup = false
+        showNextLevelTransition = true
+
 #if os(iOS)
         OrientationManager.shared.lock(to: .portrait)
         UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
         UIViewController.attemptRotationToDeviceOrientation()
 #endif
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             navigateToFlipCard = true
+            showNextLevelTransition = false
         }
     }
 
