@@ -6,15 +6,22 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeScreen: View {
+    @Query private var profiles: [ChildProfile]
     let topics: [TopicData] = [
         TopicData(number: 1, title: "Body Parts & Boundaries",     characterImage: "HomeGirl", currentStep: 2, totalSteps: 5, isLocked: false),
         TopicData(number: 2, title: "Personal Hygiene",            characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
         TopicData(number: 3, title: "Consent & Saying Yes or No",  characterImage: "HomeGirl", currentStep: 0, totalSteps: 5, isLocked: true),
         TopicData(number: 4, title: "Trusted Adults",              characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
     ]
+    private var profile: ChildProfile? {
+        profiles.first
+    }
     @State private var navigateToStoryBook = false
+    @State private var showStoryTransition = false
+    let screenSize = UIScreen.main.bounds.size
     var body: some View {
         ZStack {
             //background
@@ -53,10 +60,17 @@ struct HomeScreen: View {
                         greetingBubble
                         
                         NavigationLink(destination: ParentZoneView(), label: {
-                            Image(systemName: "person.fill")
-                                .frame(width: 48, height: 48)
-                                .background(Circle().fill(.white))
-                                .padding(.top, 8)
+                            if let avatar = profile?.avatar {
+                                Text(avatar)
+                                    .frame(width: 48, height: 48)
+                                    .background(Circle().fill(.white))
+                                    .clipShape(Circle())
+                            } else {
+                                Image(systemName: "person.fill")
+                                    .frame(width: 48, height: 48)
+                                    .background(Circle().fill(.white))
+                                    .clipShape(Circle())
+                            }
                         }
                         )
                     }
@@ -84,12 +98,9 @@ struct HomeScreen: View {
                                         totalSteps: topic.totalSteps,
                                         isLocked: topic.isLocked
                                     ) {
-                                        navigateToStoryBook = true
+                                        prepareStoryScreen()
                                         print("tapped")
                                     }
-                            
-                                
-                                
                             }
                         }
                         .padding(.horizontal, 16)
@@ -97,6 +108,31 @@ struct HomeScreen: View {
                     }
                     .padding(.top, -90)
                     .padding(.horizontal, 30)
+                }
+
+                if showStoryTransition {
+                    ZStack {
+                        Image(.storyBackground)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(
+                                width: screenSize.width,
+                                height: screenSize.height
+                            )
+                            .clipped()
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .scaleEffect(1.8)
+                                .tint(.white)
+
+                            Text("Preparing your story...")
+                                .font(.heading3())
+                                .foregroundColor(.nomiTextPrimary)
+                        }
+                    }
+                    .zIndex(20)
                 }
             }
             .navigationDestination(isPresented: $navigateToStoryBook) {
@@ -106,16 +142,25 @@ struct HomeScreen: View {
             .navigationBarBackButtonHidden(true)
         }
     }
+    
+    private func prepareStoryScreen() {
+        showStoryTransition = true
 
-    // Greeting bubble
-    private var greetingBubbleOld: some View {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            navigateToStoryBook = true
+            showStoryTransition = false
+        }
+    }
+
+    // MARK: - Greeting bubble
+    private var greetingBubble: some View {
         ZStack {
             GreetingBubbleShape()
                 .fill(Color.nomiSurfaceTint)
                 .shadow(radius: 5)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text("Good Morning, Xatriya")
+                Text("Morning, \(profile?.name ?? "Friend")")
                     .font(.heading2())
                     .foregroundColor(.nomiTextPrimary)
                 
@@ -166,4 +211,5 @@ struct HomeScreen: View {
 
 #Preview {
     HomeScreen()
+        .modelContainer(for: ChildProfile.self, inMemory: true)
 }
