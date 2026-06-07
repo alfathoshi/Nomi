@@ -149,7 +149,7 @@ struct FlipCardScreen: View {
                     .foregroundColor(.nomiTextPrimary)
                     .padding(.top, 24)
 
-                Image("NomiHome")
+                Image("NomiDoctor")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 200)

@@ -18,6 +18,7 @@ struct ScenarioQuizView: View {
     @State private var shakeAmount: CGFloat = 0
     @State private var navigateToTrustContract: Bool = false
     @State private var showCelebration = false
+    @State private var showCongratsPopup = false
     
     var body: some View {
         NavigationStack {
@@ -75,6 +76,20 @@ struct ScenarioQuizView: View {
                                     finishCelebration()
                                 }
                             }
+                    }
+                    if showCongratsPopup {
+                        CongratsPopUp(
+                            title: "Level 4 Complete",
+                            mascotImage: "NomiHome",
+                            buttonTitle: "Next Level",
+                            onDismiss: {
+                                showCongratsPopup = false
+                            },
+                            onNext: {
+                                showCongratsPopup = false
+                                navigateToTrustContract = true
+                            }
+                        )
                     }
                 }
             }
@@ -140,7 +155,7 @@ struct ScenarioQuizView: View {
         if currentIndex < scenarioData.scenarios.count - 1 {
             currentIndex += 1
         } else {
-            navigateToTrustContract = true
+            showCongratsPopup = true
         }
     }
 
@@ -148,20 +163,6 @@ struct ScenarioQuizView: View {
         guard showCelebration else { return }
         showCelebration = false
         goToNextScenario()
-    }
-
-    private func playWrongAnswerVoice() {
-        let voice = AVSpeechSynthesisVoice(
-            identifier: "com.apple.voice.enhanced.en-US.Samantha"
-        ) ?? AVSpeechSynthesisVoice(language: "en-US")
-
-        let utterance = AVSpeechUtterance(string: """
-            An older kid at the park says,
-            "Let's go behind the tree and show each other our private parts. It's a fun game!"
-            """)
-        utterance.voice = voice
-
-        speechSynthesizer.speak(utterance)
     }
 }
 
