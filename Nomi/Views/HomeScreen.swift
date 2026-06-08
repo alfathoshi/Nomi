@@ -33,27 +33,6 @@ struct HomeScreen: View {
 //                .brightness(-0.2)
 
             VStack(spacing: 0) {
-                //greeting bubble + avatar
-                HStack(alignment: .top, spacing: 8) {
-                    greetingBubble
-
-                    Image(systemName: "person.fill")
-                        .frame(width: 48, height: 48)
-                        .background(Circle().fill(.white))
-                        
-                }
-                .padding(.horizontal, 40)
-                .padding(.top)
-                .zIndex(2)
-
-                //mascot
-                Image("NomiHome")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                    .opacity(0.5)
-                //                .brightness(-0.2)
-                
                 VStack(spacing: 0) {
                     //greeting bubble + avatar
                     HStack(alignment: .top, spacing: 8) {
@@ -109,18 +88,15 @@ struct HomeScreen: View {
                     .padding(.top, -90)
                     .padding(.horizontal, 30)
                 }
-
-                if showStoryTransition {
+            }
+            if showStoryTransition {
+                GeometryReader { geo in
                     ZStack {
                         Image(.storyBackground)
                             .resizable()
                             .scaledToFill()
-                            .frame(
-                                width: screenSize.width,
-                                height: screenSize.height
-                            )
+                            .frame(width: geo.size.width, height: geo.size.height)
                             .clipped()
-                            .ignoresSafeArea()
 
                         VStack(spacing: 20) {
                             ProgressView()
@@ -132,15 +108,19 @@ struct HomeScreen: View {
                                 .foregroundColor(.nomiTextPrimary)
                         }
                     }
-                    .zIndex(20)
+                    .frame(width: geo.size.width, height: geo.size.height)
                 }
+                .ignoresSafeArea()
+                .zIndex(20)
             }
-            .navigationDestination(isPresented: $navigateToStoryBook) {
-                LandscapeStoryScreen()
-                    .navigationBarBackButtonHidden(true)
-            }
-            .navigationBarBackButtonHidden(true)
+            
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationDestination(isPresented: $navigateToStoryBook) {
+            LandscapeStoryScreen()
+                .navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
     }
     
     private func prepareStoryScreen() {
@@ -153,7 +133,7 @@ struct HomeScreen: View {
     }
 
     // MARK: - Greeting bubble
-    private var greetingBubble: some View {
+    private var greetingBubbleOld: some View {
         ZStack {
             GreetingBubbleShape()
                 .fill(Color.nomiSurfaceTint)
@@ -187,7 +167,7 @@ struct HomeScreen: View {
                 .shadow(radius: 5)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Morning, Xatriya")
+                Text("Morning, \(profile?.name ?? "Friend")")
                     .font(.heading2())
                     .foregroundColor(.nomiTextPrimary)
                 

@@ -42,7 +42,7 @@ struct FlipCardScreen: View {
     @State private var currentIndex = 0
     @State private var showCompletionPopup = false
     @State private var showConfetti = false
-
+    @State private var navigateToWordSorting: Bool = false
     private var currentCard: FlipCard {
         cards[currentIndex]
     }
@@ -72,9 +72,22 @@ struct FlipCardScreen: View {
                 Spacer()
             }
 
+            if showConfetti {
+                Color.black.opacity(0.25)
+                    .ignoresSafeArea()
+
+                LottieWrapper(fileName: "confetti")
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
+
             if showCompletionPopup {
                 completionPopup
             }
+        }
+        .navigationDestination(isPresented: $navigateToWordSorting) {
+            WordSortingView()
+                .navigationBarBackButtonHidden(true)
         }
     }
 
@@ -106,10 +119,15 @@ struct FlipCardScreen: View {
     }
 
     private func nextCard() {
-        
         if currentIndex >= cards.count - 1 {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                showCompletionPopup = true
+            showConfetti = true
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                showConfetti = false
+
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                    showCompletionPopup = true
+                }
             }
         } else {
             withAnimation(.easeInOut(duration: 0.5)) {
@@ -139,7 +157,10 @@ struct FlipCardScreen: View {
                     .scaledToFit()
                     .frame(height: 200)
 
-                Button(action: {navigateToWordSorting = true}) {
+                Button(action: {
+                    showCompletionPopup = false
+                    navigateToWordSorting = true
+                }) {
                     HStack(spacing: 8) {
                         Text("Next Level")
                             .font(.heading3())
@@ -163,17 +184,6 @@ struct FlipCardScreen: View {
             .padding(.horizontal, 32)
             .shadow(color: .black.opacity(0.2), radius: 20, y: 10)
             .transition(.scale(scale: 0.7).combined(with: .opacity))
-
-            if showConfetti {
-                LottieWrapper(fileName: "confetti", loop: true)
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-            }
-        }
-        .task {
-            showConfetti = true
-            try? await Task.sleep(for: .seconds(6))
-            showConfetti = false
         }
     }
 
