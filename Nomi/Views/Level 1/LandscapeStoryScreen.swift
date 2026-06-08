@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-struct StoryPageNew {
-    let imageName: String
-    let text: String
-}
-
 enum TextSize: String, CaseIterable {
     case small = "A"
     case medium = "AA"
@@ -33,69 +28,82 @@ enum TextSize: String, CaseIterable {
 }
 
 struct LandscapeStoryScreen: View {
-    let pages: [StoryPageNew] = [
-        StoryPageNew(imageName: "landscape 0",
-                  text: "In a land full of wonder, there lived a small, spiky hedgehog named Nomi ..."),
-        StoryPageNew(imageName: "landscape 0",
-                  text: "One day, Nomi met her friend Pip, a tiny turtle squeezing into his shell that didn’t quite fit anymore."),
-        StoryPageNew(imageName: "landscape 0",
-                  text: "One day, they found a magical adventure waiting ..."),
-    ]
+    let book: StoryBook = NomiAdventureData.storybook
 
     @State private var currentIndex: Int = 0
     @State private var showMenu: Bool = false
+    @State private var showContents: Bool = false
     @State private var textSize: TextSize = .medium
-    @StateObject private var tts = TTSManager()
-    @State private var navigateToFlipCard = false
-    @State private var showCongratsPopup = false
-    @State private var showNextLevelTransition = false
-    @State private var showCelebration = false
+    @State private var multiJumpTarget: Int? = nil
+    @StateObject private var audio = AudioManager()
 
     var onHome: () -> Void = {}
 
-    private var currentPage: StoryPageNew { pages[currentIndex] }
+    private var pages: [StoryPage] { book.pages }
+    private var currentPage: StoryPage { pages[currentIndex] }
     private var canGoPrev: Bool { currentIndex > 0 }
-    private var canGoNext: Bool { currentIndex < pages.count }
-    let screenSize = UIScreen.main.bounds.size
+    private var canGoNext: Bool { currentIndex < pages.count - 1 }
+    @State private var navigateToWordScreen = false
+    @State private var showCongratsPopup = false
+    @State private var showCelebration = false
+    @State private var showStoryTransition = false
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 PageCurlCarousel(config: config, currentPage: $currentIndex) { size in
                     ForEach(0..<pages.count, id: \.self) { index in
                         ZStack {
-                            Image(pages[index].imageName)
+                            Image(pages[index].image)
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: size.width, height: size.height)
                                 .clipped()
-                            
+
                             uiOverlay
                         }
                     }
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
 
+                if showCelebration {
+                    Color.black.opacity(0.25)
+                        .ignoresSafeArea()
+
+                    LottieWrapper(fileName: "confetti")
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                                audio.stop()
+                                showCelebration = false
+                                showCongratsPopup = true
+                            }
+                        }
+                }
+
                 if showCongratsPopup {
-                    Color.black.opacity(0.35)
+                    Color.black.opacity(0.45)
+                        .frame(width: geo.size.width, height: geo.size.height)
                         .ignoresSafeArea()
                         .onTapGesture {
                             showCongratsPopup = false
                         }
                         .zIndex(10)
 
-                    VStack(spacing: 20) {
+                    VStack(spacing: 18) {
                         Text("Story Complete")
                             .font(.heading1())
                             .foregroundColor(.nomiTextPrimary)
-                            .padding(.top, 24)
+                            .padding(.top, 20)
 
                         Image("NomiHome")
                             .resizable()
                             .scaledToFit()
-                            .frame(height: 140)
+                            .frame(height: 170)
 
                         Button(action: {
-                            prepareNextScreen()
+                            goToDoctorWordsScreen()
                         }) {
                             HStack(spacing: 8) {
                                 Text("Next Level")
@@ -106,80 +114,100 @@ struct LandscapeStoryScreen: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(.white)
                             }
-                            .padding(.horizontal, 28)
+                            .padding(.horizontal, 38)
                             .padding(.vertical, 14)
                             .background(Color.nomiPrimary)
                             .clipShape(Capsule())
                         }
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 20)
                     }
-                    .frame(width: min(geo.size.width * 0.42, 420))
+                    .frame(width: min(geo.size.width * 0.36, 360))
                     .background(Color.nomiSurfaceTint)
                     .clipShape(RoundedRectangle(cornerRadius: 28))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 28)
-                            .stroke(Color.nomiPrimary.opacity(0.5), lineWidth: 2)
-                    }
                     .shadow(color: .black.opacity(0.2), radius: 16, y: 8)
                     .zIndex(11)
                 }
 
-                if showCelebration {
-                    Color.black.opacity(0.25)
-                        .ignoresSafeArea()
-                        .zIndex(12)
+                if showStoryTransition {
+                    GeometryReader { geo in
+                        ZStack {
+                            Image(.storyBackground)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geo.size.width, height: geo.size.height)
+                                .clipped()
 
-                    LottieWrapper(fileName: "confetti")
-                        .zIndex(13)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-                                showCelebration = false
-                                showCongratsPopup = true
+                            VStack(spacing: 20) {
+                                ProgressView()
+                                    .scaleEffect(1.8)
+                                    .tint(.white)
+
+                                Text("Preparing next level...")
+                                    .font(.heading3())
+                                    .foregroundColor(.nomiTextPrimary)
                             }
                         }
-                }
-
-                if showNextLevelTransition {
-                    ZStack {
-                        Image(.storyBackground)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(
-                                width: screenSize.width,
-                                height: screenSize.height
-                            )
-                            .clipped()
-                            .ignoresSafeArea()
-
-                        VStack(spacing: 20) {
-                            ProgressView()
-                                .scaleEffect(1.8)
-                                .tint(.white)
-
-                            Text("Preparing next adventure...")
-                                .font(.heading3())
-                                .foregroundColor(.nomiTextPrimary)
-                        }
+                        .frame(width: geo.size.width, height: geo.size.height)
                     }
+                    .ignoresSafeArea()
                     .zIndex(20)
                 }
             }
         }
         .ignoresSafeArea()
-        .navigationDestination(isPresented: $navigateToFlipCard) {
-            DoctorWordsScreen()
-                .navigationBarBackButtonHidden(true)
-        }
         .onAppear {
-#if os(iOS)
+            #if os(iOS)
             OrientationManager.shared.lock(to: .landscape)
-#endif
+            #endif
+
+            playCurrentPageAudio()
         }
         .onDisappear {
-#if os(iOS)
-            OrientationManager.shared.lock(to: .portrait)
-#endif
+            #if os(iOS)
+            OrientationManager.shared.unlock()
+            #endif
+
+            audio.stop()
         }
+        .onChange(of: currentIndex) { _, newValue in
+            if let target = multiJumpTarget {
+                if newValue == target {
+                    multiJumpTarget = nil
+                    playCurrentPageAudio()
+                }
+                return
+            }
+            playCurrentPageAudio()
+        }
+        .navigationDestination(isPresented: $navigateToWordScreen) {
+            DoctorWordsScreen()
+                .navigationBarBackButtonHidden(true)
+                .onAppear {
+#if os(iOS)
+                    OrientationManager.shared.lock(to: .portrait)
+                    UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+                    UIViewController.attemptRotationToDeviceOrientation()
+#endif
+                }
+        }
+        .overlay {
+            if showContents {
+                StoryContentsGrid(
+                    pages: pages,
+                    currentIndex: currentIndex,
+                    onSelect: { index in
+                        goToPage(index)
+                    },
+                    onClose: {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            showContents = false
+                        }
+                    }
+                )
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: showContents)
     }
 
     private var uiOverlay: some View {
@@ -213,7 +241,8 @@ struct LandscapeStoryScreen: View {
 
                 navButton(pointsLeft: false, isEnabled: true) {
                     if currentIndex == pages.count - 1 {
-                        tts.stop()
+                        audio.stop()
+                        audio.play(audioName: "correct-answer")
                         showCelebration = true
                     } else {
                         goToPage(currentIndex + 1)
@@ -238,9 +267,12 @@ struct LandscapeStoryScreen: View {
 
     private var soundButton: some View {
         Button {
-            tts.speak(currentPage.text)
+            audio.toggleMute()
+            if !audio.isMuted {
+                playCurrentPageAudio()
+            }
         } label: {
-            Image(systemName: tts.isSpeaking ? "speaker.slash.fill" : "speaker.wave.2.fill")
+            Image(systemName: audio.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                 .font(.system(size: 22, weight: .bold))
                 .foregroundColor(.nomiPrimary)
                 .frame(width: 56, height: 56)
@@ -280,59 +312,66 @@ struct LandscapeStoryScreen: View {
                     showMenu = false
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(width: 28, height: 28)
+                        .frame(width: 32, height: 32)
+                        .contentShape(Rectangle())
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.trailing, 8)
             .padding(.top, 8)
 
             menuRow(icon: "square.grid.2x2.fill", label: "Contents") {
                 showMenu = false
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    showContents = true
+                }
             }
 
-            Divider()
-                .background(Color.white.opacity(0.4))
+            Rectangle()
+                .fill(Color.white.opacity(0.4))
+                .frame(height: 1)
                 .padding(.horizontal, 16)
 
             menuRow(icon: "textformat.size", label: "Text Size  \(textSize.rawValue)") {
                 textSize = textSize.next
             }
         }
-        .frame(width: 220)
+        .padding(.bottom, 12)
+        .frame(width: 230)
         .background(
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 28)
                 .fill(Color.nomiPrimary)
         )
-        .shadow(color: .black.opacity(0.25), radius: 10, y: 6)
+        .shadow(color: .black.opacity(0.25), radius: 12, y: 6)
         .transition(.scale(scale: 0.8, anchor: .topTrailing).combined(with: .opacity))
     }
 
     @ViewBuilder
     private func menuRow(icon: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
+                    .frame(width: 24)
                 Text(label)
                     .font(.heading3())
                     .foregroundColor(.white)
                 Spacer()
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
 
     private var storyTextOverlay: some View {
-        Text(processedText(currentPage.text))
+        currentPage.content
             .font(.system(size: textSize.fontSize, weight: .semibold))
             .foregroundColor(.nomiTextPrimary)
-            .multilineTextAlignment(.leading)
+            .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
@@ -343,15 +382,6 @@ struct LandscapeStoryScreen: View {
             )
             .shadow(color: .black.opacity(0.1), radius: 6, y: 4)
             .animation(.easeInOut(duration: 0.2), value: textSize)
-    }
-
-    private func processedText(_ raw: String) -> AttributedString {
-        var attr = AttributedString(raw)
-        if let range = attr.range(of: "Nomi") {
-            attr[range].foregroundColor = .nomiPrimary
-            attr[range].font = .bodyLarge(weight: .bold)
-        }
-        return attr
     }
 
     @ViewBuilder
@@ -369,16 +399,42 @@ struct LandscapeStoryScreen: View {
 
     private func goToPage(_ index: Int) {
         guard index >= 0, index < pages.count else { return }
-        tts.stop()
-        withAnimation(.easeInOut(duration: 1.2)) {
-            currentIndex = index
+        let delta = index - currentIndex
+        guard delta != 0 else { return }
+
+        if abs(delta) == 1 {
+            withAnimation(.easeInOut(duration: 1.2)) {
+                currentIndex = index
+            }
+        } else {
+            let preTarget = delta > 0 ? index - 1 : index + 1
+            multiJumpTarget = index
+
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                currentIndex = preTarget
+            }
+
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 1.2)) {
+                    currentIndex = index
+                }
+            }
         }
     }
 
-    private func prepareNextScreen() {
-        tts.stop()
+    private func playCurrentPageAudio() {
+        audio.stop()
+        if let name = currentPage.audioName {
+            audio.play(audioName: name)
+        }
+    }
+
+    private func goToDoctorWordsScreen() {
+        audio.stop()
         showCongratsPopup = false
-        showNextLevelTransition = true
+        showStoryTransition = true
 
 #if os(iOS)
         OrientationManager.shared.lock(to: .portrait)
@@ -387,8 +443,8 @@ struct LandscapeStoryScreen: View {
 #endif
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            navigateToFlipCard = true
-            showNextLevelTransition = false
+            navigateToWordScreen = true
+            showStoryTransition = false
         }
     }
 

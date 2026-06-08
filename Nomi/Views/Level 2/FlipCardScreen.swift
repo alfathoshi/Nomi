@@ -43,6 +43,7 @@ struct FlipCardScreen: View {
     @State private var showCompletionPopup = false
     @State private var showConfetti = false
     @State private var navigateToWordSorting: Bool = false
+    @StateObject private var audio = AudioManager()
     private var currentCard: FlipCard {
         cards[currentIndex]
     }
@@ -86,8 +87,11 @@ struct FlipCardScreen: View {
             }
         }
         .navigationDestination(isPresented: $navigateToWordSorting) {
-            WordSortingView()
+            Level3ExplanationView()
                 .navigationBarBackButtonHidden(true)
+        }
+        .onDisappear {
+            audio.stop()
         }
     }
 
@@ -120,9 +124,12 @@ struct FlipCardScreen: View {
 
     private func nextCard() {
         if currentIndex >= cards.count - 1 {
+            audio.stop()
+            audio.play(audioName: "correct-answer")
             showConfetti = true
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                audio.stop()
                 showConfetti = false
 
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
