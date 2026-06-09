@@ -5,13 +5,13 @@
 //  Created by Yohanes Vito Rizki D on 04/06/26.
 //
 
-import Foundation
+import SwiftUI
 
 struct FlipCard {
     let frontLabel: String
-    let frontEmoji: String
+    let frontImage: ImageResource
     let frontAudioName: String
-    let realNames: [String]          // multiple names joined by "or" — e.g. ["Chest", "Nipple"]
+    let realNames: [String]
     let backAudioName: String
-    let alternativeName: String?     // optional — shown as "also known as ..." (e.g. "Burung")
+    let alternativeName: String?
 }

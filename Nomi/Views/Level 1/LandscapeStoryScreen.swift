@@ -160,7 +160,9 @@ struct LandscapeStoryScreen: View {
             OrientationManager.shared.lock(to: .landscape)
             #endif
 
-            playCurrentPageAudio()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                playCurrentPageAudio()
+            }
         }
         .onDisappear {
             #if os(iOS)
@@ -180,7 +182,7 @@ struct LandscapeStoryScreen: View {
             playCurrentPageAudio()
         }
         .navigationDestination(isPresented: $navigateToWordScreen) {
-            DoctorWordsScreen()
+            Level2ExplanationScreen()
                 .navigationBarBackButtonHidden(true)
                 .onAppear {
 #if os(iOS)
@@ -398,6 +400,10 @@ struct LandscapeStoryScreen: View {
         .disabled(!isEnabled)
     }
 
+    // TODO: BUG — multi-page jump (delta >= 2) via Contents Grid leaves currentIndex at preTarget (target - 1).
+    // Root cause: PageCurlCarousel's .scrollPosition binding setter writes back preTarget value after Phase 1 snap,
+    // overriding Phase 2's withAnimation { currentIndex = target }. Tried 100ms delay + linear animation — got worse.
+    // Possible fix: refactor PageCurlCarousel to use ScrollViewReader.scrollTo (one-way) instead of bidirectional binding.
     private func goToPage(_ index: Int) {
         guard index >= 0, index < pages.count else { return }
         let delta = index - currentIndex

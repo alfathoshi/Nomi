@@ -10,7 +10,7 @@ import AVFoundation
 
 let screenSize = UIScreen.main.bounds.size
 
-struct DoctorWordsScreen: View {
+struct Level2ExplanationScreen: View {
     @State private var navigateToFlipCard = false
     @State private var audioPlayer: AVAudioPlayer?
     var body: some View {
@@ -113,5 +113,5 @@ struct DoctorWordsScreen: View {
 }
 
 #Preview {
-    DoctorWordsScreen()
+    Level2ExplanationScreen()
 }

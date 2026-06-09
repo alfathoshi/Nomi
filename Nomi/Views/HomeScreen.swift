@@ -33,6 +33,7 @@ struct HomeScreen: View {
         profiles.first
     }
     @State private var navigateToLearningScreen = false
+    @State private var showIntro = false
     @State private var showStoryTransition = false
     @State private var nextLevel = 1
     let screenSize = UIScreen.main.bounds.size
@@ -132,6 +133,12 @@ struct HomeScreen: View {
         .navigationDestination(isPresented: $navigateToLearningScreen) {
             nextLearningScreen
         }
+        .fullScreenCover(isPresented: $showIntro) {
+            NomiIntroductionView(
+                childName: profile?.name ?? "Friend",
+                onContinue: { showIntro = false }
+            )
+        }
         .navigationBarBackButtonHidden(true)
     }
     
@@ -157,7 +164,7 @@ struct HomeScreen: View {
             case 1:
                 LandscapeStoryScreen()
             case 2:
-                DoctorWordsScreen()
+                Level2ExplanationScreen()
             case 3:
                 Level3ExplanationView()
             case 4:
@@ -225,6 +232,10 @@ struct HomeScreen: View {
         }
         .frame(width: 305, height: 128)
         .padding(.bottom, 30)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showIntro = true
+        }
     }
 }
 
