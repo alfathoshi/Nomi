@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 struct Level5ExplanationView: View {
     let highlight = Text("Trust Promise together")
         .foregroundColor(.nomiPrimary)
         .font(.heading3())
+    @State private var showParentPasscode = false
     @State private var navigateToChildPromise = false
-    @State private var audioPlayer: AVAudioPlayer?
+    @State private var proceedAfterPasscode = false
+    @StateObject private var audio = AudioManager()
+
     var body: some View {
         NavigationStack {
             LevelExplanationScreen(
@@ -25,45 +27,37 @@ struct Level5ExplanationView: View {
                 ],
                 buttonTitle: "My Trusted Adult is Here",
             ) {
-                navigateToChildPromise.toggle()
+                audio.stop()
+                showParentPasscode = true
             }
             .onAppear {
-                playNarration(named: "Level-5-Explanation", fileExtension: "mp3")
+                audio.play(audioName: "Level-5-Explanation")
             }
             .onDisappear {
-                stopNarration()
+                audio.stop()
             }
             .navigationDestination(isPresented: $navigateToChildPromise) {
                 ChildPromiseView()
                     .navigationBarBackButtonHidden(true)
             }
+            .fullScreenCover(isPresented: $showParentPasscode, onDismiss: {
+                if proceedAfterPasscode {
+                    proceedAfterPasscode = false
+                    navigateToChildPromise = true
+                } else {
+                    audio.play(audioName: "Level-5-Explanation")
+                }
+            }) {
+                NavigationStack {
+                    ParentPasscodeView {
+                        proceedAfterPasscode = true
+                        showParentPasscode = false
+                    } onBack: {
+                        showParentPasscode = false
+                    }
+                }
+            }
         }
-    }
-    
-    private func playNarration(named fileName: String, fileExtension: String) {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
-            print("Narration audio not found: \(fileName).\(fileExtension)")
-            return
-        }
-
-        print("Narration audio found: \(url.lastPathComponent)")
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play narration audio: \(error.localizedDescription)")
-        }
-    }
-
-    private func stopNarration() {
-        audioPlayer?.stop()
-        audioPlayer = nil
-        try? AVAudioSession.sharedInstance().setActive(false)
     }
 }
 

@@ -16,26 +16,34 @@ struct FlipCardScreen: View {
         FlipCard(
             frontLabel: "Boy's Private\nPart",
             frontEmoji: "🩲",
+            frontAudioName: "BoysPart",
             realNames: ["Penis"],
-            alternativeName: "Pee - pee"
+            backAudioName: "Penis",
+            alternativeName: "Pee-pee"
         ),
         FlipCard(
             frontLabel: "Girl's Private\nPart",
             frontEmoji: "👙",
+            frontAudioName: "GirlsPart",
             realNames: ["Vagina"],
-            alternativeName: "Miss v or Nunu"
+            backAudioName: "Vagina",
+            alternativeName: "Miss V"
         ),
         FlipCard(
             frontLabel: "Upper Private\nPart",
             frontEmoji: "👕",
+            frontAudioName: "UpperPart",
             realNames: ["Chest","or","Nipple"],
+            backAudioName: "Chest",
             alternativeName: nil
         ),
         FlipCard(
             frontLabel: "Back Private\nPart",
             frontEmoji: "🍑",
+            frontAudioName: "BackPart",
             realNames: ["Buttocks", "or" ,"Bottom"],
-            alternativeName: "Bum - bum"
+            backAudioName: "Buttocks",
+            alternativeName: "Bum-bum"
         ),
     ]
 
@@ -113,7 +121,13 @@ struct FlipCardScreen: View {
                 .offset(x: 6, y: 6)
                 .rotationEffect(.degrees(2))
 
-            FlippableCardView(card: currentCard, onNext: nextCard)
+            FlippableCardView(
+                card: currentCard,
+                onPlayAudio: { audioName in
+                    audio.play(audioName: audioName)
+                },
+                onNext: nextCard
+            )
                 .id(currentIndex)
                 .transition(.asymmetric(
                     insertion: .scale(scale: 0.85).combined(with: .opacity),
@@ -206,6 +220,7 @@ struct FlipCardScreen: View {
 // flippable
 struct FlippableCardView: View {
     let card: FlipCard
+    let onPlayAudio: (String) -> Void
     let onNext: () -> Void
 
     @State private var isFlipped = false
@@ -228,11 +243,15 @@ struct FlippableCardView: View {
             axis: (x: 0, y: 1, z: 0)
         )
         .animation(.easeInOut(duration: 0.8), value: isFlipped)
+        .onAppear {
+            onPlayAudio(card.frontAudioName)
+        }
     }
 
     private var frontCard: some View {
         Button {
             isFlipped = true
+            onPlayAudio(card.backAudioName)
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: cardCornerRadius)

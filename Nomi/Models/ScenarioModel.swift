@@ -12,4 +12,5 @@ struct ScenarioModel: Identifiable {
     let id = UUID()
     let image: ImageResource
     let content: String
+    let audioNames: [String]
 }

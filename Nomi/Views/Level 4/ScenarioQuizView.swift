@@ -6,13 +6,12 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 struct ScenarioQuizView: View {
     private let scenarioData = ScenarioData()
     private let correctAnswers: [Bool] = [false, true]
-    private let speechSynthesizer = AVSpeechSynthesizer()
-    @State private var audioPlayer: AVAudioPlayer?
+    @StateObject private var narrationAudio = AudioManager()
+    @StateObject private var feedbackAudio = AudioManager()
     
     @State private var currentIndex = 0
     @State private var shakeAmount: CGFloat = 0
@@ -99,6 +98,16 @@ struct ScenarioQuizView: View {
             }
             .ignoresSafeArea()
             .toolbar(.hidden, for: .navigationBar)
+            .onAppear {
+                playCurrentScenarioAudio()
+            }
+            .onChange(of: currentIndex) { _, _ in
+                playCurrentScenarioAudio()
+            }
+            .onDisappear {
+                narrationAudio.stop()
+                feedbackAudio.stop()
+            }
         }
     }
     private func checkAnswer(isSafeAnswer: Bool) {
@@ -116,39 +125,17 @@ struct ScenarioQuizView: View {
     }
     
     private func playCorrectAnswerSound() {
-        guard let url = Bundle.main.url(forResource: "correct-answer", withExtension: "mp3") else {
-            print("Correct answer audio not found")
-            return
-        }
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play correct answer audio: \(error.localizedDescription)")
-        }
+        narrationAudio.stop()
+        feedbackAudio.play(audioName: "correct-answer")
     }
 
     private func playWrongAnswerSound() {
-        guard let url = Bundle.main.url(forResource: "wrong-answer", withExtension: "mp3") else {
-            print("Wrong answer audio not found")
-            return
-        }
+        feedbackAudio.play(audioName: "wrong-answer")
+    }
 
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play wrong answer audio: \(error.localizedDescription)")
-        }
+    private func playCurrentScenarioAudio() {
+        let audioNames = scenarioData.scenarios[currentIndex].audioNames
+        narrationAudio.playSequence(audioNames: audioNames)
     }
 
     private func goToNextScenario() {

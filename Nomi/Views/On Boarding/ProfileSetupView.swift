@@ -15,6 +15,8 @@ struct ProfileSetupView: View {
     @State private var selectedAge: Int? = nil
     @State private var selectedAvatar: String? = nil
     @State private var selectedGender: String? = nil
+    @State private var showParentPasscode = false
+    @State private var savedProfile: ChildProfile?
     private var isFormComplete: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         selectedAge != nil &&
@@ -125,7 +127,7 @@ struct ProfileSetupView: View {
                     icon: "arrow.forward")
                 {
                     if saveProfile() {
-                        onCompleted()
+                        showParentPasscode = true
                     }
                 }
                 .disabled(!isFormComplete)
@@ -139,6 +141,12 @@ struct ProfileSetupView: View {
         .padding(.horizontal, 20)
         .padding(.top, 20)
         .navigationTitle("Set up Your Child's Profile")
+        .navigationDestination(isPresented: $showParentPasscode) {
+            OnboardingParentPasscodeView(
+                childName: name,
+                onCompleted: onCompleted
+            )
+        }
         //.navigationBarTitleDisplayMode(.inline)
     }
     private func saveProfile() -> Bool {
@@ -149,14 +157,21 @@ struct ProfileSetupView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return false }
 
-        let profile = ChildProfile(
-            avatar: selectedAvatar,
-            name: trimmedName,
-            age: selectedAge,
-            gender: selectedGender
-        )
-
-        modelContext.insert(profile)
+        if let savedProfile {
+            savedProfile.avatar = selectedAvatar
+            savedProfile.name = trimmedName
+            savedProfile.age = selectedAge
+            savedProfile.gender = selectedGender
+        } else {
+            let profile = ChildProfile(
+                avatar: selectedAvatar,
+                name: trimmedName,
+                age: selectedAge,
+                gender: selectedGender
+            )
+            modelContext.insert(profile)
+            savedProfile = profile
+        }
 
         do {
             try modelContext.save()
@@ -164,6 +179,28 @@ struct ProfileSetupView: View {
         } catch {
             print("Failed to save child profile: \(error.localizedDescription)")
             return false
+        }
+    }
+}
+
+private struct OnboardingParentPasscodeView: View {
+    let childName: String
+    let onCompleted: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var showNomiIntroduction = false
+
+    var body: some View {
+        ParentPasscodeView {
+            showNomiIntroduction = true
+        } onBack: {
+            dismiss()
+        }
+        .navigationDestination(isPresented: $showNomiIntroduction) {
+            NomiIntroductionView(
+                childName: childName,
+                onContinue: onCompleted
+            )
         }
     }
 }
