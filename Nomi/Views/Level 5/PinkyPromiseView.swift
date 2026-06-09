@@ -75,6 +75,7 @@ struct PinkyPromiseView: View {
                     Spacer()
                     
                     WideButton(title: "SEAL IT", icon: nil) {
+                        LearningProgress.complete(level: 5)
                         navigateToCongratsScreen.toggle()
                     }
                     .padding(.horizontal, 20)

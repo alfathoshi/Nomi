@@ -6,38 +6,53 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ParentDashboardView: View {
+    @Query private var profiles: [ChildProfile]
+    @AppStorage(LearningProgress.completedLevelsKey)
+    private var completedLevels = 0
+    var onExit: () -> Void = {}
+
     let columns = [
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10)
     ]
-    @Environment(\.dismiss) private var dismiss
+
+    private var profile: ChildProfile? {
+        profiles.first
+    }
+
+    private var dashboardData: ParentDashboardData {
+        ParentDashboardData.make(completedLevels: completedLevels)
+    }
+
+    private var childName: String {
+        profile?.name ?? "Your child"
+    }
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading) {
-                    HStack {
-                        ChipCapsule(
-                            title: "Parent Mode",
-                            leftIcon: "figure.2.and.child.holdinghands",
-                            foregroundColor: .nomiPrimary,
-                            backgroundColor: .nomiSurfaceTint
-                        )
-                        Spacer()
-                        ChipCapsule(
-                            title: "Exit",
-                            rightIcon: "arrow.right",
-                            foregroundColor: .nomiTextSecondary,
-                            backgroundColor: Color.gray.opacity(0.2),
-                        ) {
-                            dismiss()
-                        }
-                        
+        ScrollView {
+            VStack(alignment: .leading) {
+                HStack {
+                    ChipCapsule(
+                        title: "Parent Mode",
+                        leftIcon: "figure.2.and.child.holdinghands",
+                        foregroundColor: .nomiPrimary,
+                        backgroundColor: .nomiSurfaceTint
+                    )
+                    Spacer()
+                    ChipCapsule(
+                        title: "Exit",
+                        rightIcon: "arrow.right",
+                        foregroundColor: .nomiTextSecondary,
+                        backgroundColor: Color.gray.opacity(0.2),
+                    ) {
+                        onExit()
                     }
+                }
                     
-                    HStack() {
-                        Text("👦")
+                HStack() {
+                        Text(profile?.avatar ?? "👦")
                             .font(.display())
                             .foregroundColor( .nomiTextPrimary)
                             .frame(width: 72, height: 72)
@@ -52,14 +67,17 @@ struct ParentDashboardView: View {
                             )
                         
                         VStack(alignment: .leading) {
-                            Text("Xatriya's Progress")
+                            Text("\(childName)'s Progress")
                                 .font(.heading2())
-                            Text("Age 8 · 3 day streak 🔥")
+                            Text(
+                                "Age \(profile?.age ?? 0) · "
+                                + "\(dashboardData.completedLevels)/\(dashboardData.totalLevels) levels"
+                            )
                                 .font(.label(weight: .regular))
                         }
                         Spacer()
                         VStack(alignment: .leading) {
-                            Text("🌟 24")
+                            Text("🌟 0")
                                 .font(.heading2())
                                 .foregroundColor(.nomiAccent)
                             Text("Total Coins")
@@ -70,130 +88,107 @@ struct ParentDashboardView: View {
                     Divider()
                         .padding(.horizontal, -20)
                         .padding(.bottom, 20)
-                    
-                    Section("Overview") {
-                        
-                        LazyVGrid(
-                            columns: columns,
-                            spacing: 10
-                        ) {
-                            StatCard(
-                                icon: "books.vertical.fill",
-                                value: "2",
-                                label: "Levels completed",
-                                iconColor: .nomiAccent
-                            )
-                            
-                            StatCard(
-                                icon: "clock.fill",
-                                value: "14m",
-                                label: "Time spent today",
-                                iconColor: .nomiPrimary
-                            )
-                            
-                            StatCard(
-                                icon: "trophy.fill",
-                                value: "1",
-                                label: "Badges earned",
-                                iconColor: .nomiPrimary
-                            )
-                            
-                            StatCard(
-                                icon: "checkmark.square.fill",
-                                value: "85%",
-                                label: "Quiz accuracy",
-                                iconColor: .nomiSuccess
-                            )
-                        }
-                    }
-                    .font(.heading3())
-                    .padding(.bottom, 20)
-                    
-                    Section("Topics") {
-                        
-                        VStack(spacing: 10) {
-                            
-                            TopicProgressCard(
-                                emoji: "🧠",
-                                title: "Body Parts & Boundaries",
-                                progress: 0.6,
-                                progressColor: .nomiPrimary
-                            )
-                            
-                            TopicProgressCard(
-                                emoji: "🧼",
-                                title: "Personal Hygiene",
-                                progress: 0.3,
-                                progressColor: .nomiAccent
-                            )
-                            
-                            TopicProgressCard(
-                                emoji: "✋",
-                                title: "Consent & Saying Yes/No",
-                                progress: 0.1,
-                                progressColor: .nomiSuccess
-                            )
-                        }
-                    }
-                    .font(.heading3())
-                    .padding(.bottom, 20)
-                    
-                    Text("Recent Activity")
-                        .font(.heading3())
-                        .padding(.bottom, 20)
-                    
-                    VStack(alignment: .leading) {
-                        ActivityItem(
-                            emoji: "✅",
-                            title: #"Completed "Private body parts" — Level 2"#,
-                            time: "Today · 9:38 AM",
-                            showDivider: true
-                        )
-                        ActivityItem(
-                            emoji: "🏆",
-                            title: "Earned Body Expert Badge",
-                            time: "Today · 9:40 AM",
-                            showDivider: true
-                        )
-                        ActivityItem(
-                            emoji: "📝",
-                            title: "Quiz: 2/2 correct answers",
-                            time: "Today · 9:42 AM",
-                            showDivider: true
-                        )
-                        ActivityItem(
-                            emoji: "✅",
-                            title: #"Completed "What is your body?" — Level 1"#,
-                            time: "Yesterday · 4:20 PM",
-                            showDivider: false
-                        )
-                    }
-                    .padding(16)
-                    .background(Color.white)
-                    .clipShape(
-                        RoundedRectangle(cornerRadius: 20)
+
+                if dashboardData.hasProgress {
+                    progressContent
+                } else {
+                    ParentDashboardEmptyState(childName: childName)
+                }
+            }
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: .infinity,
+                alignment: .topLeading
+            )
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+        }
+        .scrollIndicators(.hidden)
+        .navigationBarBackButtonHidden(true)
+    }
+
+    private var progressContent: some View {
+        Group {
+            Section("Overview") {
+                LazyVGrid(
+                    columns: columns,
+                    spacing: 10
+                ) {
+                    StatCard(
+                        icon: "books.vertical.fill",
+                        value: "\(dashboardData.completedLevels)",
+                        label: "Levels completed",
+                        iconColor: .nomiAccent
                     )
-                    .shadow(
-                        color: .black.opacity(0.06),
-                        radius: 12,
-                        x: 0,
-                        y: 2
+
+                    StatCard(
+                        icon: "clock.fill",
+                        value: "—",
+                        label: "Time spent today",
+                        iconColor: .nomiPrimary
+                    )
+
+                    StatCard(
+                        icon: "trophy.fill",
+                        value: "\(dashboardData.badgesEarned)",
+                        label: "Badges earned",
+                        iconColor: .nomiPrimary
+                    )
+
+                    StatCard(
+                        icon: "checkmark.square.fill",
+                        value: "—",
+                        label: "Quiz accuracy",
+                        iconColor: .nomiSuccess
                     )
                 }
-                .frame(
-                    maxWidth: .infinity,
-                    maxHeight: .infinity,
-                    alignment: .topLeading
-                )
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
             }
-            .scrollIndicators(.hidden)
-            .navigationBarBackButtonHidden(true)
+            .font(.heading3())
+            .padding(.bottom, 20)
+
+            Section("Topics") {
+                VStack(spacing: 10) {
+                    TopicProgressCard(
+                        emoji: "🧠",
+                        title: "Body Parts & Boundaries",
+                        progress: CGFloat(dashboardData.topicProgress),
+                        progressColor: .nomiPrimary
+                    )
+                }
+            }
+            .font(.heading3())
+            .padding(.bottom, 20)
+
+            Text("Recent Activity")
+                .font(.heading3())
+                .padding(.bottom, 20)
+
+            VStack(alignment: .leading) {
+                ForEach(Array(dashboardData.activities.enumerated()), id: \.element.id) { index, activity in
+                    ActivityItem(
+                        emoji: "✅",
+                        title: activity.title,
+                        time: activity.timeText,
+                        showDivider: index < dashboardData.activities.count - 1
+                    )
+                }
+            }
+            .padding(16)
+            .background(Color.white)
+            .clipShape(
+                RoundedRectangle(cornerRadius: 20)
+            )
+            .shadow(
+                color: .black.opacity(0.06),
+                radius: 12,
+                x: 0,
+                y: 2
+            )
         }
     }
 }
 
 #Preview {
     ParentDashboardView()
+        .modelContainer(for: ChildProfile.self, inMemory: true)
 }

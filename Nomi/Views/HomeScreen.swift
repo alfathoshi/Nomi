@@ -10,65 +10,79 @@ import SwiftData
 
 struct HomeScreen: View {
     @Query private var profiles: [ChildProfile]
-    let topics: [TopicData] = [
-        TopicData(number: 1, title: "Body Parts & Boundaries",     characterImage: "HomeGirl", currentStep: 2, totalSteps: 5, isLocked: false),
-        TopicData(number: 2, title: "Personal Hygiene",            characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
-        TopicData(number: 3, title: "Consent & Saying Yes or No",  characterImage: "HomeGirl", currentStep: 0, totalSteps: 5, isLocked: true),
-        TopicData(number: 4, title: "Trusted Adults",              characterImage: "HomeBoy",  currentStep: 0, totalSteps: 5, isLocked: true),
-    ]
+    @AppStorage(LearningProgress.completedLevelsKey)
+    private var completedLevels = 0
+    var onOpenParent: () -> Void = {}
+
+    private var topics: [TopicData] {
+        [
+            TopicData(
+                number: 1,
+                title: "Body Parts & Boundaries",
+                characterImage: "HomeGirl",
+                currentStep: min(max(completedLevels, 0), LearningProgress.totalLevels),
+                totalSteps: LearningProgress.totalLevels,
+                isLocked: false
+            ),
+            TopicData(number: 2, title: "Personal Hygiene", characterImage: "HomeBoy", isLocked: true),
+            TopicData(number: 3, title: "Consent & Saying Yes or No", characterImage: "HomeGirl", isLocked: true),
+            TopicData(number: 4, title: "Trusted Adults", characterImage: "HomeBoy", isLocked: true),
+        ]
+    }
     private var profile: ChildProfile? {
         profiles.first
     }
-    @State private var navigateToStoryBook = false
+    @State private var navigateToLearningScreen = false
     @State private var showStoryTransition = false
+    @State private var nextLevel = 1
     let screenSize = UIScreen.main.bounds.size
     var body: some View {
         ZStack {
-            //background
-            Image(.homeBg)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-//                .opacity(0.5)
-//                .brightness(-0.2)
+                //background
+                Image(.homeBg)
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
 
-            VStack(spacing: 0) {
                 VStack(spacing: 0) {
-                    //greeting bubble + avatar
-                    HStack(alignment: .top, spacing: 8) {
-                        greetingBubble
-                        
-                        NavigationLink(destination: ParentZoneView(), label: {
-                            if let avatar = profile?.avatar {
-                                Text(avatar)
-                                    .frame(width: 48, height: 48)
-                                    .background(Circle().fill(.white))
-                                    .clipShape(Circle())
-                            } else {
-                                Image(systemName: "person.fill")
-                                    .frame(width: 48, height: 48)
-                                    .background(Circle().fill(.white))
-                                    .clipShape(Circle())
+                    VStack(spacing: 0) {
+                        //greeting bubble + avatar
+                        HStack(alignment: .top, spacing: 8) {
+                            greetingBubble
+
+                            Button {
+                                onOpenParent()
+                            } label: {
+                                if let avatar = profile?.avatar {
+                                    Text(avatar)
+                                        .frame(width: 48, height: 48)
+                                        .background(Circle().fill(.white))
+                                        .clipShape(Circle())
+                                } else {
+                                    Image(systemName: "person.fill")
+                                        .frame(width: 48, height: 48)
+                                        .background(Circle().fill(.white))
+                                        .clipShape(Circle())
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
-                        )
-                    }
-                    .padding(.horizontal, 40)
-                    .zIndex(2)
-                    
-                    //mascot
-                    Image("NomiHome")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 200)
-                        .offset(y: -60)
-                        .shadow(radius: 15)
-                        .zIndex(0)
-                    
-                    //cardlist
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 12) {
-                            ForEach(topics) { topic in
+                        .padding(.horizontal, 40)
+                        .zIndex(2)
+
+                        //mascot
+                        Image("NomiHome")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 200)
+                            .offset(y: -60)
+                            .shadow(radius: 15)
+                            .zIndex(0)
+
+                        //cardlist
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 12) {
+                                ForEach(topics) { topic in
                                     TopicCard(
                                         number: topic.number,
                                         title: topic.title,
@@ -77,59 +91,84 @@ struct HomeScreen: View {
                                         totalSteps: topic.totalSteps,
                                         isLocked: topic.isLocked
                                     ) {
-                                        prepareStoryScreen()
-                                        print("tapped")
+                                        prepareLearningScreen()
                                     }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 30)
+                        }
+                        .padding(.top, -90)
+                        .padding(.horizontal, 30)
+                    }
+                }
+                if showStoryTransition {
+                    GeometryReader { geo in
+                        ZStack {
+                            Image(.storyBackground)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geo.size.width, height: geo.size.height)
+                                .clipped()
+
+                            VStack(spacing: 20) {
+                                ProgressView()
+                                    .scaleEffect(1.8)
+                                    .tint(.white)
+
+                                Text("Preparing your story...")
+                                    .font(.heading3())
+                                    .foregroundColor(.nomiTextPrimary)
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 30)
+                        .frame(width: geo.size.width, height: geo.size.height)
                     }
-                    .padding(.top, -90)
-                    .padding(.horizontal, 30)
+                    .ignoresSafeArea()
+                    .zIndex(20)
                 }
-            }
-            if showStoryTransition {
-                GeometryReader { geo in
-                    ZStack {
-                        Image(.storyBackground)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geo.size.width, height: geo.size.height)
-                            .clipped()
 
-                        VStack(spacing: 20) {
-                            ProgressView()
-                                .scaleEffect(1.8)
-                                .tint(.white)
-
-                            Text("Preparing your story...")
-                                .font(.heading3())
-                                .foregroundColor(.nomiTextPrimary)
-                        }
-                    }
-                    .frame(width: geo.size.width, height: geo.size.height)
-                }
-                .ignoresSafeArea()
-                .zIndex(20)
-            }
-            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationDestination(isPresented: $navigateToStoryBook) {
-            LandscapeStoryScreen()
-                .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $navigateToLearningScreen) {
+            nextLearningScreen
         }
         .navigationBarBackButtonHidden(true)
     }
     
-    private func prepareStoryScreen() {
-        showStoryTransition = true
+    private func prepareLearningScreen() {
+        nextLevel = min(max(completedLevels + 1, 1), LearningProgress.totalLevels + 1)
 
+        guard nextLevel == 1 else {
+            navigateToLearningScreen = true
+            return
+        }
+
+        showStoryTransition = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            navigateToStoryBook = true
+            navigateToLearningScreen = true
             showStoryTransition = false
         }
+    }
+
+    @ViewBuilder
+    private var nextLearningScreen: some View {
+        Group {
+            switch nextLevel {
+            case 1:
+                LandscapeStoryScreen()
+            case 2:
+                DoctorWordsScreen()
+            case 3:
+                Level3ExplanationView()
+            case 4:
+                Level4ExplanationView()
+            case 5:
+                Level5ExplanationView()
+            default:
+                CongratsView()
+            }
+        }
+        .navigationBarBackButtonHidden(true)
     }
 
     // MARK: - Greeting bubble

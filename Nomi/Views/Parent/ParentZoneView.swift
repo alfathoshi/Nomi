@@ -8,24 +8,25 @@
 import SwiftUI
 
 struct ParentZoneView: View {
+    @Binding var path: NavigationPath
+
     let columns = [
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10),
     ]
-    @Environment(\.dismiss) private var dismiss
     @State private var service = ParentZoneViewModel()
+
     var body: some View {
-        NavigationStack {
-            VStack {
+        VStack {
                 Text("🔐")
                     .font(.system(size: 64))
                 
-                Text("Parent Zone")
+                Text(service.title)
                     .font(.heading2())
                     .padding(.bottom, 10)
                 
-                Text("This area is for grown-ups only.\nEnter your PIN to continue.")
+                Text(service.instruction)
                     .multilineTextAlignment(.center)
                     .font(.bodySmall(weight: .regular))
                     .foregroundColor(.nomiTextSecondary)
@@ -43,6 +44,15 @@ struct ParentZoneView: View {
                     }
                 }
                 .padding(.bottom, 20)
+
+                if let message = service.message {
+                    Text(message)
+                        .font(.label(weight: .regular))
+                        .foregroundColor(.nomiDanger)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 12)
+                }
                 
                 LazyVGrid(
                     columns: columns,
@@ -76,21 +86,18 @@ struct ParentZoneView: View {
                         service.handleDigit("9")
                     }
                     KeypadButton(value: "👆") {
-                        service.validatePin()
-                    }
-                    .navigationDestination(
-                        isPresented: $service.isAuthenticated
-                    ) {
-                        ParentDashboardView()
+                        service.submitPin()
+                        if service.isAuthenticated {
+                            path.append(Route.parentDashboard)
+                            service.isAuthenticated = false
+                        }
                     }
                     KeypadButton(value: "0") {
                         service.handleDigit("0")
                     }
                     
                     Button {
-                        if !service.enteredPin.isEmpty {
-                            service.enteredPin.removeLast()
-                        }
+                        service.deleteDigit()
                     } label: {
                         Image(systemName: "delete.left")
                             .font(.heading1())
@@ -100,7 +107,7 @@ struct ParentZoneView: View {
                 .padding(.bottom, 32)
                 
                 Button {
-                    dismiss()
+                    path = NavigationPath()
                 } label: {
                     Label("Back to Child Zone", systemImage: "arrow.left")
                         .font(.button())
@@ -108,15 +115,14 @@ struct ParentZoneView: View {
                         .foregroundStyle(Color.nomiPrimary)
                 }
                 .buttonStyle(.plain)
-            }
-            .navigationBarBackButtonHidden(true)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.horizontal, 20)
-            .padding(.top, 40)
         }
+        .navigationBarBackButtonHidden(true)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.horizontal, 20)
+        .padding(.top, 40)
     }
 }
 
 #Preview {
-    ParentZoneView()
+    ParentZoneView(path: .constant(NavigationPath()))
 }
