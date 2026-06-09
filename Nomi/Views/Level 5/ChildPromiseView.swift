@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ChildPromiseView: View {
     @State private var navigateToParentPromise = false
+    @StateObject private var audio = AudioManager()
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -54,6 +56,12 @@ struct ChildPromiseView: View {
             .navigationDestination(isPresented: $navigateToParentPromise) {
                 ParentPromiseView()
                     .navigationBarBackButtonHidden(true)
+            }
+            .onAppear {
+                audio.play(audioName: "ChildPromise")
+            }
+            .onDisappear {
+                audio.stop()
             }
         }
     }

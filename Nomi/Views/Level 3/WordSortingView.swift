@@ -66,14 +66,14 @@ struct WordSortingView: View {
                 VStack(spacing: 24) {
                     HStack(spacing: 16) {
                         DropContainer(
-                            title: "Private",
+                            title: "Private\nParts",
                             frame: $doctorsFrame,
                             showWrongOverlay: showPrivateWrongOverlay
                         )
                         .offset(x: privateContainerShake)
                         
                         DropContainer(
-                            title: "Non-Private",
+                            title: "Non-Private\nParts",
                             frame: $strangersFrame,
                             showWrongOverlay: showNonPrivateWrongOverlay
                         )
@@ -437,6 +437,7 @@ struct DropContainer: View {
             Text(title)
                 .font(.heading2(weight:.extraBold))
                 .foregroundStyle(Color.nomiTextPrimary)
+                .multilineTextAlignment(.center)
             
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color.nomiSurfaceTint)
@@ -456,7 +457,7 @@ struct DropContainer: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(
-                            title == "Private"
+                            title == "Private\nParts"
                             ? Color.nomiSuccess.opacity(0.5)
                             : Color.nomiDanger.opacity(0.5),
                             lineWidth: 2

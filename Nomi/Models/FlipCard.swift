@@ -10,6 +10,8 @@ import Foundation
 struct FlipCard {
     let frontLabel: String
     let frontEmoji: String
+    let frontAudioName: String
     let realNames: [String]          // multiple names joined by "or" — e.g. ["Chest", "Nipple"]
+    let backAudioName: String
     let alternativeName: String?     // optional — shown as "also known as ..." (e.g. "Burung")
 }

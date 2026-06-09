@@ -15,6 +15,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var isPlaying: Bool = false
 
     private var player: AVAudioPlayer?
+    private var queuedAudioURLs: [URL] = []
 
     override init() {
         super.init()
@@ -31,6 +32,26 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             return
         }
 
+        play(url: url)
+    }
+
+    func playSequence(audioNames: [String], fileExtension: String = "mp3") {
+        stop()
+
+        guard !isMuted else { return }
+
+        queuedAudioURLs = audioNames.compactMap { audioName in
+            guard let url = Bundle.main.url(forResource: audioName, withExtension: fileExtension) else {
+                print("⚠️ AudioManager: Audio file not found — \(audioName).\(fileExtension)")
+                return nil
+            }
+            return url
+        }
+
+        playNextQueuedAudio()
+    }
+
+    private func play(url: URL) {
         do {
             player = try AVAudioPlayer(contentsOf: url)
             player?.delegate = self
@@ -45,6 +66,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func stop() {
         player?.stop()
         player = nil
+        queuedAudioURLs.removeAll()
         isPlaying = false
     }
 
@@ -82,6 +104,17 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        isPlaying = false
+        playNextQueuedAudio()
+    }
+
+    private func playNextQueuedAudio() {
+        guard !queuedAudioURLs.isEmpty else {
+            player = nil
+            isPlaying = false
+            return
+        }
+
+        let nextURL = queuedAudioURLs.removeFirst()
+        play(url: nextURL)
     }
 }

@@ -9,6 +9,9 @@ import SwiftUI
 
 struct PinkyPromiseView: View {
     @State private var navigateToCongratsScreen: Bool = false
+    @State private var showConfetti = false
+    @StateObject private var audio = AudioManager()
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -19,7 +22,7 @@ struct PinkyPromiseView: View {
                     .clipped()
                     .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
+                VStack() {
                     Text("PINKY PROMISE")
                         .font(.heading1(size: 40))
                         .foregroundColor(.nomiPrimary)
@@ -61,7 +64,7 @@ struct PinkyPromiseView: View {
                             .lineSpacing(4)
                         
                     }
-                    .frame(width: 340, height: 250)
+                    .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
@@ -74,18 +77,43 @@ struct PinkyPromiseView: View {
                     
                     Spacer()
                     
-                    WideButton(title: "SEAL IT", icon: nil) {
-                        LearningProgress.complete(level: 5)
-                        navigateToCongratsScreen.toggle()
+                    TwoFingerHoldArea(duration: 5) {
+                        completePinkyPromise()
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 44)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+
+                if showConfetti {
+                    Color.black.opacity(0.25)
+                        .ignoresSafeArea()
+
+                    LottieWrapper(fileName: "confetti")
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
                 }
             }
             .navigationDestination(isPresented: $navigateToCongratsScreen) {
                 CongratsView()
                     .navigationBarBackButtonHidden(true)
             }
+            .onAppear {
+                audio.play(audioName: "PinkyPromise")
+            }
+            .onDisappear {
+                audio.stop()
+            }
+        }
+    }
+
+    private func completePinkyPromise() {
+        LearningProgress.complete(level: 5)
+        showConfetti = true
+        audio.play(audioName: "correct-answer")
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+            showConfetti = false
+            navigateToCongratsScreen = true
         }
     }
 }
