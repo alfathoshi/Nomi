@@ -155,6 +155,7 @@ struct ScenarioQuizView: View {
         if currentIndex < scenarioData.scenarios.count - 1 {
             currentIndex += 1
         } else {
+            LearningProgress.complete(level: 4)
             showCongratsPopup = true
         }
     }

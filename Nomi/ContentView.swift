@@ -6,28 +6,12 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @AppStorage("hasSeenSplash") private var hasSeenSplash = false
-    @State private var path = NavigationPath()
-    
     var body: some View {
-        NavigationStack(path: $path) {
-            Group {
-                if hasSeenSplash {
-                    HomeScreen()
-                        .id(path.count)
-                } else {
-                    SplashScreen()
-                }
-            }
+        NavigationStack {
+            SplashScreen()
         }
-        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("NavigateToHome"))) { _ in
-            path = NavigationPath()
-            hasSeenSplash = true
-        }
-        .modelContainer(for: ChildProfile.self)
     }
 }
 

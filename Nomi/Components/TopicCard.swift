@@ -23,7 +23,13 @@ struct TopicCard: View {
         return min(Double(currentStep) / Double(totalSteps), 1.0)
     }
 
-    private var buttonLabel: String { hasProgress ? "Continue" : "Start" }
+    private var buttonLabel: String {
+        if currentStep >= totalSteps {
+            return "Open"
+        }
+
+        return hasProgress ? "Continue" : "Start"
+    }
 
     var body: some View {
         Button(action: action) {

@@ -125,8 +125,9 @@ struct ProfileSetupView: View {
                     title: "Continue",
                     icon: "arrow.forward")
                 {
-                    saveProfile()
-                    goToHomeScreen = true
+                    if saveProfile() {
+                        goToHomeScreen = true
+                    }
                 }
                 .disabled(!isFormComplete)
                 .opacity(isFormComplete ? 1 : 0.5)
@@ -146,13 +147,13 @@ struct ProfileSetupView: View {
             //.navigationBarTitleDisplayMode(.inline)
         }
     }
-    private func saveProfile() {
+    private func saveProfile() -> Bool {
         guard let selectedAge,
               let selectedAvatar,
-              let selectedGender else { return }
+              let selectedGender else { return false }
 
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else { return }
+        guard !trimmedName.isEmpty else { return false }
 
         let profile = ChildProfile(
             avatar: selectedAvatar,
@@ -165,8 +166,10 @@ struct ProfileSetupView: View {
 
         do {
             try modelContext.save()
+            return true
         } catch {
             print("Failed to save child profile: \(error.localizedDescription)")
+            return false
         }
     }
 }

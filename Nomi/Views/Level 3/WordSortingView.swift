@@ -161,6 +161,7 @@ struct WordSortingView: View {
     private func checkSortingResult() {
         if isSortingCorrect {
             playCorrectAnswerSound()
+            LearningProgress.complete(level: 3)
             showCelebration = true
         } else {
             playWrongAnswerSound()

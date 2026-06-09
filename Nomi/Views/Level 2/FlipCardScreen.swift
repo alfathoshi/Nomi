@@ -126,6 +126,7 @@ struct FlipCardScreen: View {
         if currentIndex >= cards.count - 1 {
             audio.stop()
             audio.play(audioName: "correct-answer")
+            LearningProgress.complete(level: 2)
             showConfetti = true
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {

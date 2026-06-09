@@ -243,6 +243,7 @@ struct LandscapeStoryScreen: View {
                     if currentIndex == pages.count - 1 {
                         audio.stop()
                         audio.play(audioName: "correct-answer")
+                        LearningProgress.complete(level: 1)
                         showCelebration = true
                     } else {
                         goToPage(currentIndex + 1)
