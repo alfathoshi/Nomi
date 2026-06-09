@@ -11,8 +11,7 @@ import DotLottie
 
 struct SplashScreen: View {
     @Query private var profiles: [ChildProfile]
-    @State private var navigateToOnboarding = false
-    @State private var navigateToHome = false
+    var onFinished: (Bool) -> Void = { _ in }
 
     private var hasProfile: Bool {
         !profiles.isEmpty
@@ -51,27 +50,19 @@ struct SplashScreen: View {
                         background: .nomiSurface,
                         foreground: .nomiPrimary
                     ) {
-                        navigateToOnboarding = true
+                        onFinished(false)
                     }
                 }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 44)
         }
-        .navigationDestination(isPresented: $navigateToOnboarding) {
-            OnBoardingView()
-                .navigationBarBackButtonHidden(true)
-        }
-        .navigationDestination(isPresented: $navigateToHome) {
-            HomeScreen()
-                .navigationBarBackButtonHidden(true)
-        }
         .task(id: hasProfile) {
             guard hasProfile else { return }
 
             try? await Task.sleep(nanoseconds: 1_500_000_000)
             guard !Task.isCancelled else { return }
-            navigateToHome = true
+            onFinished(true)
         }
     }
 }

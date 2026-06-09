@@ -10,11 +10,11 @@ import SwiftData
 
 struct ProfileSetupView: View {
     @Environment(\.modelContext) private var modelContext
+    var onCompleted: () -> Void = {}
     @State private var name = ""
     @State private var selectedAge: Int? = nil
     @State private var selectedAvatar: String? = nil
     @State private var selectedGender: String? = nil
-    @State private var goToHomeScreen: Bool = false
     private var isFormComplete: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         selectedAge != nil &&
@@ -44,8 +44,7 @@ struct ProfileSetupView: View {
         return min(max(completed, 1), 4)
     }
     var body: some View {
-        NavigationStack{
-            VStack (alignment: .leading) {
+        VStack (alignment: .leading) {
                 Text("Step \(completedProfileSteps) of 4")
                     .font(.label(weight: .regular))
                 
@@ -126,26 +125,21 @@ struct ProfileSetupView: View {
                     icon: "arrow.forward")
                 {
                     if saveProfile() {
-                        goToHomeScreen = true
+                        onCompleted()
                     }
                 }
                 .disabled(!isFormComplete)
                 .opacity(isFormComplete ? 1 : 0.5)
-                .navigationDestination(isPresented: $goToHomeScreen) {
-                    HomeScreen()
-                }
-            }
-            
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .topLeading
-            )
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .navigationTitle("Set up Your Child's Profile")
-            //.navigationBarTitleDisplayMode(.inline)
         }
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity,
+            alignment: .topLeading
+        )
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
+        .navigationTitle("Set up Your Child's Profile")
+        //.navigationBarTitleDisplayMode(.inline)
     }
     private func saveProfile() -> Bool {
         guard let selectedAge,

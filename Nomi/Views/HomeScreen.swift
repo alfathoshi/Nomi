@@ -12,6 +12,7 @@ struct HomeScreen: View {
     @Query private var profiles: [ChildProfile]
     @AppStorage(LearningProgress.completedLevelsKey)
     private var completedLevels = 0
+    var onOpenParent: () -> Void = {}
 
     private var topics: [TopicData] {
         [
@@ -37,49 +38,51 @@ struct HomeScreen: View {
     let screenSize = UIScreen.main.bounds.size
     var body: some View {
         ZStack {
-            //background
-            Image(.homeBg)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
+                //background
+                Image(.homeBg)
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
 
-            VStack(spacing: 0) {
                 VStack(spacing: 0) {
-                    //greeting bubble + avatar
-                    HStack(alignment: .top, spacing: 8) {
-                        greetingBubble
-                        
-                        NavigationLink(destination: ParentZoneView(), label: {
-                            if let avatar = profile?.avatar {
-                                Text(avatar)
-                                    .frame(width: 48, height: 48)
-                                    .background(Circle().fill(.white))
-                                    .clipShape(Circle())
-                            } else {
-                                Image(systemName: "person.fill")
-                                    .frame(width: 48, height: 48)
-                                    .background(Circle().fill(.white))
-                                    .clipShape(Circle())
+                    VStack(spacing: 0) {
+                        //greeting bubble + avatar
+                        HStack(alignment: .top, spacing: 8) {
+                            greetingBubble
+
+                            Button {
+                                onOpenParent()
+                            } label: {
+                                if let avatar = profile?.avatar {
+                                    Text(avatar)
+                                        .frame(width: 48, height: 48)
+                                        .background(Circle().fill(.white))
+                                        .clipShape(Circle())
+                                } else {
+                                    Image(systemName: "person.fill")
+                                        .frame(width: 48, height: 48)
+                                        .background(Circle().fill(.white))
+                                        .clipShape(Circle())
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
-                        )
-                    }
-                    .padding(.horizontal, 40)
-                    .zIndex(2)
-                    
-                    //mascot
-                    Image("NomiHome")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 200)
-                        .offset(y: -60)
-                        .shadow(radius: 15)
-                        .zIndex(0)
-                    
-                    //cardlist
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 12) {
-                            ForEach(topics) { topic in
+                        .padding(.horizontal, 40)
+                        .zIndex(2)
+
+                        //mascot
+                        Image("NomiHome")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 200)
+                            .offset(y: -60)
+                            .shadow(radius: 15)
+                            .zIndex(0)
+
+                        //cardlist
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 12) {
+                                ForEach(topics) { topic in
                                     TopicCard(
                                         number: topic.number,
                                         title: topic.title,
@@ -90,40 +93,40 @@ struct HomeScreen: View {
                                     ) {
                                         prepareLearningScreen()
                                     }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 30)
+                        }
+                        .padding(.top, -90)
+                        .padding(.horizontal, 30)
+                    }
+                }
+                if showStoryTransition {
+                    GeometryReader { geo in
+                        ZStack {
+                            Image(.storyBackground)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geo.size.width, height: geo.size.height)
+                                .clipped()
+
+                            VStack(spacing: 20) {
+                                ProgressView()
+                                    .scaleEffect(1.8)
+                                    .tint(.white)
+
+                                Text("Preparing your story...")
+                                    .font(.heading3())
+                                    .foregroundColor(.nomiTextPrimary)
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 30)
+                        .frame(width: geo.size.width, height: geo.size.height)
                     }
-                    .padding(.top, -90)
-                    .padding(.horizontal, 30)
+                    .ignoresSafeArea()
+                    .zIndex(20)
                 }
-            }
-            if showStoryTransition {
-                GeometryReader { geo in
-                    ZStack {
-                        Image(.storyBackground)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geo.size.width, height: geo.size.height)
-                            .clipped()
 
-                        VStack(spacing: 20) {
-                            ProgressView()
-                                .scaleEffect(1.8)
-                                .tint(.white)
-
-                            Text("Preparing your story...")
-                                .font(.heading3())
-                                .foregroundColor(.nomiTextPrimary)
-                        }
-                    }
-                    .frame(width: geo.size.width, height: geo.size.height)
-                }
-                .ignoresSafeArea()
-                .zIndex(20)
-            }
-            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationDestination(isPresented: $navigateToLearningScreen) {

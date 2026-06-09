@@ -9,12 +9,13 @@ import SwiftUI
 
 struct OnBoardingView: View {
     @State private var goToProfile = false
+    var onProfileCompleted: () -> Void = {}
+
     private var canStart: Bool {
         true
     }
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading) {
+        VStack(alignment: .leading) {
                 HStack {
                     Spacer()
                     Image("Mascot")
@@ -88,21 +89,17 @@ struct OnBoardingView: View {
                 .disabled(!canStart)
                 .opacity(canStart ? 1 : 0.5)
                 .navigationDestination(isPresented: $goToProfile) {
-                    ProfileSetupView()
+                    ProfileSetupView(onCompleted: onProfileCompleted)
                 }
                 
-            }
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .topLeading
-            )
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
         }
-        
-        
-        
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity,
+            alignment: .topLeading
+        )
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
     }
 }
 
