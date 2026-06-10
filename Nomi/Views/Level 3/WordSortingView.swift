@@ -7,7 +7,6 @@
 
 
 import SwiftUI
-import AVFoundation
 
 struct WordSortingView: View {
     var onComplete: () -> Void = {}
@@ -35,7 +34,7 @@ struct WordSortingView: View {
     @State private var initialBankOrder: [UUID] = []
     @State private var initialBankPositions: [UUID: CGPoint] = [:]
     @State private var initialBankRotations: [UUID: Double] = [:]
-    @State private var audioPlayer: AVAudioPlayer?
+    @StateObject private var audio = AudioManager()
     
     let screenSize = UIScreen.main.bounds.size
     
@@ -99,6 +98,14 @@ struct WordSortingView: View {
                     .padding(.top, 62)
                     .zIndex(60)
 
+                AudioMuteButton(isMuted: audio.isMuted) {
+                    audio.toggleMute()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.trailing, 20)
+                .padding(.top, 62)
+                .zIndex(60)
+
                 if didPlaceInitialWords {
                     ForEach($words, id: \.id) { $word in
                         DraggableWord(
@@ -156,6 +163,9 @@ struct WordSortingView: View {
                 guard !didPlaceInitialWords, newFrame.width > 0, newFrame.height > 0 else { return }
                 placeInitialWordsInWordBank()
                 didPlaceInitialWords = true
+            }
+            .onDisappear {
+                audio.stop()
             }
         }
     }
@@ -358,39 +368,11 @@ struct WordSortingView: View {
     }
     
     private func playCorrectAnswerSound() {
-        guard let url = Bundle.main.url(forResource: "correct-answer", withExtension: "mp3") else {
-            print("Correct answer audio not found")
-            return
-        }
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play correct answer audio: \(error.localizedDescription)")
-        }
+        audio.play(audioName: "correct-answer")
     }
 
     private func playWrongAnswerSound() {
-        guard let url = Bundle.main.url(forResource: "wrong-answer", withExtension: "mp3") else {
-            print("Wrong answer audio not found")
-            return
-        }
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play wrong answer audio: \(error.localizedDescription)")
-        }
+        audio.play(audioName: "wrong-answer")
     }
 
     private func triggerWrongDropFeedback(for category: WordCategory) {

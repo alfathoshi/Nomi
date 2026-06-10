@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 struct Level3ExplanationView: View {
     var onComplete: () -> Void = {}
@@ -19,7 +18,7 @@ struct Level3ExplanationView: View {
         .foregroundColor(.nomiPrimary)
         .font(.heading3())
     @State private var navigateToWordSorting = false
-    @State private var audioPlayer: AVAudioPlayer?
+    @StateObject private var audio = AudioManager()
     var body: some View {
         Group {
             if navigateToWordSorting {
@@ -38,38 +37,31 @@ struct Level3ExplanationView: View {
                     Text("Drag the \(highlight1) and the \(highlight2) of your body to the designated sides!").font(.heading2(weight: .semiBold, size: 20))
                 ],
                 buttonTitle: "Start",
-                onBack: onBack
+                onBack: onBack,
+                isMuted: audio.isMuted,
+                onToggleMute: toggleMute
             ) {
                 navigateToWordSorting.toggle()
             }
             .onAppear {
-                playNarration(named: "Level-3-Explanation", fileExtension: "mp3")
+                playNarration()
             }
             .onDisappear {
-                stopNarration()
+                audio.stop()
             }
             }
         }
     }
 
-    private func playNarration(named fileName: String, fileExtension: String) {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
-            print("Narration audio not found: \(fileName).\(fileExtension)")
-            return
-        }
-
-        do {
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play narration audio: \(error.localizedDescription)")
+    private func toggleMute() {
+        audio.toggleMute()
+        if !audio.isMuted {
+            playNarration()
         }
     }
 
-    private func stopNarration() {
-        audioPlayer?.stop()
-        audioPlayer = nil
+    private func playNarration() {
+        audio.play(audioName: "Level-3-Explanation")
     }
 }
 

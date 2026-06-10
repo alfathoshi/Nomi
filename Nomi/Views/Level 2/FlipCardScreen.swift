@@ -21,6 +21,7 @@ struct FlipCardScreen: View {
     @State private var showCompletionPopup = false
     @State private var showConfetti = false
     @State private var audioPlayTask: Task<Void, Never>?
+    @State private var currentAudioName: String?
     @StateObject private var audio = AudioManager()
     private var currentCard: FlipCard {
         cards[currentIndex]
@@ -45,7 +46,8 @@ struct FlipCardScreen: View {
                     .foregroundColor(.nomiTextPrimary)
 
                 cardStack
-                    .padding(.top, 78)
+                    .padding(.top, 72)
+                    .padding(.bottom, 72)
 
                 
             }
@@ -54,6 +56,16 @@ struct FlipCardScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.leading, 20)
                 .padding(.top, 62)
+
+            AudioMuteButton(isMuted: audio.isMuted) {
+                audio.toggleMute()
+                if !audio.isMuted, let currentAudioName {
+                    playAudioAfterDelay(currentAudioName)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            .padding(.trailing, 20)
+            .padding(.top, 62)
 
             if showConfetti {
                 Color.black.opacity(0.25)
@@ -147,6 +159,7 @@ struct FlipCardScreen: View {
     }
 
     private func playAudioAfterDelay(_ audioName: String) {
+        currentAudioName = audioName
         audio.stop()
         audioPlayTask?.cancel()
 

@@ -32,6 +32,23 @@ struct SoundButtonStyle: ButtonStyle {
     }
 }
 
+struct AudioMuteButton: View {
+    let isMuted: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.nomiPrimary)
+                .frame(width: 48, height: 48)
+                .background(Circle().fill(.white))
+                .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+        }
+        .accessibilityLabel(isMuted ? "Unmute audio" : "Mute audio")
+    }
+}
+
 extension View {
     func tapSound(_ name: String = "ClickButton", fileExtension: String = "m4a", volume: Float = 1.5) -> some View {
         self.simultaneousGesture(

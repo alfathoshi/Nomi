@@ -14,6 +14,8 @@ struct LevelExplanationScreen: View {
     let paragraphs: [Text]
     let buttonTitle: String
     let onBack: () -> Void
+    var isMuted: Bool? = nil
+    var onToggleMute: () -> Void = {}
     let onStart: () -> Void
 
     var body: some View {
@@ -68,6 +70,13 @@ struct LevelExplanationScreen: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.leading, 20)
             .padding(.top, 62)
+
+            if let isMuted {
+                AudioMuteButton(isMuted: isMuted, action: onToggleMute)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.trailing, 20)
+                    .padding(.top, 62)
+            }
         }
     }
 }

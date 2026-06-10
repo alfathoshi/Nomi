@@ -216,18 +216,11 @@ struct LandscapeStoryScreen: View {
     }
 
     private var soundButton: some View {
-        Button {
+        AudioMuteButton(isMuted: audio.isMuted) {
             audio.toggleMute()
             if !audio.isMuted {
                 playCurrentPageAudio()
             }
-        } label: {
-            Image(systemName: audio.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.nomiPrimary)
-                .frame(width: 56, height: 56)
-                .background(Circle().fill(.white))
-                .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
         }
     }
 

@@ -69,6 +69,13 @@ struct ScenarioQuizView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                         .padding(.leading, 20)
                         .padding(.top, 62)
+
+                    AudioMuteButton(isMuted: narrationAudio.isMuted) {
+                        toggleMute()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.trailing, 20)
+                    .padding(.top, 62)
                     
                     if showCelebration {
                         Color.black.opacity(0.3)
@@ -142,6 +149,21 @@ struct ScenarioQuizView: View {
     
     private func playWrongAnswerSound() {
         playFeedbackAfterDelay("wrong-answer")
+    }
+
+    private func toggleMute() {
+        let shouldMute = !narrationAudio.isMuted
+
+        if narrationAudio.isMuted != shouldMute {
+            narrationAudio.toggleMute()
+        }
+        if feedbackAudio.isMuted != shouldMute {
+            feedbackAudio.toggleMute()
+        }
+
+        if !shouldMute {
+            playCurrentScenarioAudio()
+        }
     }
     
     private func playCurrentScenarioAudio() {

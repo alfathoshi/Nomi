@@ -83,6 +83,16 @@ struct PinkyPromiseView: View {
                     .padding(.leading, 20)
                     .padding(.top, 62)
 
+                AudioMuteButton(isMuted: audio.isMuted) {
+                    audio.toggleMute()
+                    if !audio.isMuted {
+                        audio.play(audioName: "PinkyPromise")
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.trailing, 20)
+                .padding(.top, 62)
+
                 if showConfetti {
                     Color.black.opacity(0.25)
                         .ignoresSafeArea()

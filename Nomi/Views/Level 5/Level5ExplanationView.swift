@@ -91,7 +91,14 @@ struct Level5ExplanationView: View {
                 Text(" Go invite a Parent, Guardian, or safe grown-up to join you for a special \(highlight)").font(.heading2(weight: .semiBold, size: 20))
             ],
             buttonTitle: "My Trusted Adult is Here",
-            onBack: onBack
+            onBack: onBack,
+            isMuted: audio.isMuted,
+            onToggleMute: {
+                audio.toggleMute()
+                if !audio.isMuted {
+                    audio.play(audioName: "Level-5-Explanation")
+                }
+            }
         ) {
             audio.stop()
             showParentPasscode = true

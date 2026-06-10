@@ -60,6 +60,16 @@ struct ParentPromiseView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(.leading, 20)
                     .padding(.top, 62)
+
+                AudioMuteButton(isMuted: audio.isMuted) {
+                    audio.toggleMute()
+                    if !audio.isMuted {
+                        audio.play(audioName: "ParentPromise", volume: 6)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.trailing, 20)
+                .padding(.top, 62)
             }
             .onAppear {
                 audio.play(audioName: "ParentPromise", volume: 6)
