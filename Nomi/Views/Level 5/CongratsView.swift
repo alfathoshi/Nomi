@@ -26,6 +26,7 @@ struct CongratsView: View {
                 
                 
                 VStack {
+                    Spacer()
                     Text("GREAT JOB!")
                         .font(.heading1(size: 40))
                         .foregroundColor(.nomiPrimary)

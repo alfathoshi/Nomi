@@ -13,6 +13,7 @@ let cardCornerRadius: CGFloat = 32
 
 struct FlipCardScreen: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     let cards: [FlipCard] = FlipCardData.cards
 
@@ -37,18 +38,22 @@ struct FlipCardScreen: View {
                 .clipped()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack() {
+                
                 Text("Doctor's Words")
                     .font(.heading1(size: 36))
                     .foregroundColor(.nomiTextPrimary)
-                    .padding(.top, 100)
 
                 cardStack
                     .padding(.top, 78)
 
-                Spacer()
-                Spacer()
+                
             }
+
+            NomiBackButton(action: onBack)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.leading, 20)
+                .padding(.top, 62)
 
             if showConfetti {
                 Color.black.opacity(0.25)

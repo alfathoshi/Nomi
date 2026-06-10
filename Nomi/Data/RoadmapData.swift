@@ -12,7 +12,7 @@ struct RoadmapData {
     static let nodes: [RoadmapNodeData] = [
         RoadmapNodeData(
             x: 0.25,
-            y: 0.10,
+            y: 0.15,
             levelLabel: LevelLabelInfo(level: 5, title: "Final Quiz", position: .below),
             icon: .level5
         ),

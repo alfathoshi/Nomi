@@ -12,6 +12,7 @@ let screenSize = UIScreen.main.bounds.size
 
 struct Level2ExplanationScreen: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     @State private var navigateToFlipCard = false
     @State private var audioPlayer: AVAudioPlayer?
@@ -22,7 +23,12 @@ struct Level2ExplanationScreen: View {
 
         Group {
             if navigateToFlipCard {
-                FlipCardScreen(onComplete: onComplete)
+                FlipCardScreen(
+                    onComplete: onComplete,
+                    onBack: {
+                        navigateToFlipCard = false
+                    }
+                )
             } else {
             ZStack {
                 Image(.storyBackground)
@@ -35,7 +41,8 @@ struct Level2ExplanationScreen: View {
                     .clipped()
                     .ignoresSafeArea()
                 
-                VStack(spacing: 24) {
+                VStack() {
+                    Spacer()
                     // Title
                     Text("Doctor's Words")
                         .font(.heading1(size: 36))
@@ -77,6 +84,11 @@ struct Level2ExplanationScreen: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 48)
                 }
+
+                NomiBackButton(action: onBack)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.leading, 20)
+                .padding(.top, 62)
             }
             .onAppear {
                 playNarration(named: "Level-2-Explanation", fileExtension: "mp3")

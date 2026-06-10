@@ -10,6 +10,7 @@ import AVFoundation
 
 struct Level3ExplanationView: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     let highlight1 = Text("Private Part")
         .foregroundColor(.nomiPrimary)
@@ -22,7 +23,12 @@ struct Level3ExplanationView: View {
     var body: some View {
         Group {
             if navigateToWordSorting {
-                WordSortingView(onComplete: onComplete)
+                WordSortingView(
+                    onComplete: onComplete,
+                    onBack: {
+                        navigateToWordSorting = false
+                    }
+                )
             } else {
             LevelExplanationScreen(
                 title: "Doctor's Words",
@@ -32,6 +38,7 @@ struct Level3ExplanationView: View {
                     Text("Drag the \(highlight1) and the \(highlight2) of your body to the designated sides!").font(.heading2(weight: .semiBold, size: 20))
                 ],
                 buttonTitle: "Start",
+                onBack: onBack
             ) {
                 navigateToWordSorting.toggle()
             }

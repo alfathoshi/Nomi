@@ -37,13 +37,14 @@ struct NomiApp: App {
         WindowGroup {
             ContentView()
                 .buttonStyle(SoundButtonStyle())
+                .preferredColorScheme(.light)
         }
         .modelContainer(sharedModelContainer)
     }
 }
 
 #if os(iOS)
-// MARK: - AppDelegate (read orientation lock dari OrientationManager)
+// MARK: - AppDelegate
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
         _ application: UIApplication,

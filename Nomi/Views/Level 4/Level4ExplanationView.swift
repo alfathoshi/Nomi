@@ -10,6 +10,7 @@ import AVFoundation
 
 struct Level4ExplanationView: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     let highlight1 = Text("SAFE")
         .foregroundColor(.nomiPrimary)
@@ -22,7 +23,12 @@ struct Level4ExplanationView: View {
     var body: some View {
         Group {
             if navigateToScenarioQuiz {
-                ScenarioQuizView(onComplete: onComplete)
+                ScenarioQuizView(
+                    onComplete: onComplete,
+                    onBack: {
+                        navigateToScenarioQuiz = false
+                    }
+                )
             } else {
             LevelExplanationScreen(
                 title: "Safety Detective",
@@ -31,6 +37,7 @@ struct Level4ExplanationView: View {
                     Text("Your private parts belong only to you. Some situations are \(highlight1), like getting help from a parent or doctor. Other situations are \(highlight2). Let's decide which is which!").font(.heading2(weight: .semiBold, size: 20))
                 ],
                 buttonTitle: "Start",
+                onBack: onBack
             ) {
                 navigateToScenarioQuiz.toggle()
             }

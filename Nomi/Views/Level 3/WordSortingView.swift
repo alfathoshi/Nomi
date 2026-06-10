@@ -11,6 +11,7 @@ import AVFoundation
 
 struct WordSortingView: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
     
     @State private var words = SortingWordData.words
     @State private var showCelebration = false
@@ -61,7 +62,8 @@ struct WordSortingView: View {
                     .clipped()
                     .ignoresSafeArea()
                 
-                VStack(spacing: 24) {
+                VStack() {
+                    Spacer()
                     HStack(spacing: 16) {
                         DropContainer(
                             title: "Private\nParts",
@@ -77,18 +79,26 @@ struct WordSortingView: View {
                         )
                         .offset(x: nonPrivateContainerShake)
                     }
-                    
+
                     WordBankDropContainer(frame: $wordBankFrame)
                         .frame(height: 180)
-                    
-                    WideButton(title: "Finish Sorting", icon: "flag.pattern.checkered") {
+
+                    WideButton(title: "Finish Sorting", icon: "flag.pattern.checkered", ) {
                         checkSortingResult()
                     }
                     .disabled(isFinishDisabled)
+
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 84)
+                .padding(.top, 124)
                 .padding(.bottom, 44)
+
+                NomiBackButton(action: onBack)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.leading, 20)
+                    .padding(.top, 62)
+                    .zIndex(60)
+
                 if didPlaceInitialWords {
                     ForEach($words, id: \.id) { $word in
                         DraggableWord(
@@ -166,9 +176,16 @@ struct WordSortingView: View {
         guard let wordIndex = words.firstIndex(where: { $0.id == wordID }) else {
             return .zero
         }
-        
+
         if category != .unassigned {
             let expectedCategory = correctCategory(for: words[wordIndex])
+            let isNewCategoryChoice = category != words[wordIndex].category
+
+            if isNewCategoryChoice {
+                LearningAnalytics.recordQuizAnswer(
+                    isCorrect: expectedCategory == category
+                )
+            }
 
             if expectedCategory != category {
                 triggerWrongDropFeedback(for: category)

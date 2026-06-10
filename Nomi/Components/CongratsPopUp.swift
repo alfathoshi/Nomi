@@ -63,6 +63,7 @@ struct CongratsPopUp: View {
                 .padding(.bottom, 24)
             }
             .padding(.horizontal, 16)
+            .frame(maxWidth: 420)
             .background(
                 RoundedRectangle(cornerRadius: 32)
                     .fill(.white)

@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
+
     @State private var launchPhase: LaunchPhase = .splash
     @State private var isSplashVisible = true
     @State private var nextLaunchPhase: LaunchPhase?
@@ -27,6 +29,18 @@ struct ContentView: View {
                     finishSplash(hasProfile: hasProfile)
                 }
                 .opacity(isSplashVisible ? 1 : 0)
+            }
+        }
+        .onAppear {
+            if scenePhase == .active {
+                AppUsageTracker.shared.start()
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                AppUsageTracker.shared.start()
+            } else {
+                AppUsageTracker.shared.stop()
             }
         }
     }

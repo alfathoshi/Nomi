@@ -63,7 +63,9 @@ struct HomeScreen: View {
                                     Image(avatar)
                                         .resizable()
                                         .scaledToFit()
-                                        .padding(8)
+                                        .padding(profile?.avatar == "Mascot" || profile?.avatar == "Pip"
+                                                 ? 6
+                                                 : 4)
                                         .frame(width: 48, height: 48)
                                         .background(Circle().fill(.white))
                                         .clipShape(Circle())

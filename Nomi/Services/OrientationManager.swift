@@ -17,7 +17,7 @@ final class OrientationManager {
     private init() {}
 
     #if os(iOS)
-    var supportedOrientations: UIInterfaceOrientationMask = .all
+    var supportedOrientations: UIInterfaceOrientationMask = .portrait
 
     func lock(to mask: UIInterfaceOrientationMask) {
         supportedOrientations = mask
@@ -25,7 +25,7 @@ final class OrientationManager {
     }
 
     func unlock() {
-        supportedOrientations = .all
+        lock(to: .portrait)
     }
 
     private func requestRotation(to mask: UIInterfaceOrientationMask) {
@@ -34,7 +34,7 @@ final class OrientationManager {
         else { return }
 
         scene.requestGeometryUpdate(.iOS(interfaceOrientations: mask)) { error in
-            print("⚠️ OrientationManager: rotate failed — \(error.localizedDescription)")
+            print("OrientationManager: rotate failed - \(error.localizedDescription)")
         }
     }
     #endif

@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ScenarioQuizView: View {
     var onComplete: () -> Void = {}
-
+    var onBack: () -> Void = {}
+    
     private let scenarioData = ScenarioData()
     private let correctAnswers: [Bool] = [false, true]
     @StateObject private var narrationAudio = AudioManager()
@@ -32,45 +33,50 @@ struct ScenarioQuizView: View {
                         .frame(width: geo.size.width, height: geo.size.height)
                         .clipped()
                         .ignoresSafeArea()
-
+                    
                     VStack() {
                         Spacer()
-                    Text("Safety Detective")
-                        .font(.heading1(weight: .black, size: 38))
-                        .foregroundStyle(Color.nomiTextPrimary)
-                        .multilineTextAlignment(.center)
+                        Text("Safety Detective")
+                            .font(.heading1(weight: .black, size: 38))
+                            .foregroundStyle(Color.nomiTextPrimary)
+                            .multilineTextAlignment(.center)
                         
-                    
-                    ScenarioCard(
-                        image: scenarioData.scenarios[currentIndex].image,
-                        text: scenarioData.scenarios[currentIndex].content
-                    )
-                    .padding(.horizontal, 22)
-                    .modifier(ShakeEffect(animatableData: shakeAmount))
-
-                    Spacer()
-
-                    HStack(spacing: 14) {
-                        WideButton(title: "Safe", background: .nomiSuccess, foreground: .white) {
-                            checkAnswer(isSafeAnswer: true)
+                        
+                        ScenarioCard(
+                            image: scenarioData.scenarios[currentIndex].image,
+                            text: scenarioData.scenarios[currentIndex].content
+                        )
+                        .modifier(ShakeEffect(animatableData: shakeAmount))
+                        
+                        Spacer()
+                        
+                        HStack(spacing: 14) {
+                            WideButton(title: "Safe", background: .nomiSuccess, foreground: .white) {
+                                checkAnswer(isSafeAnswer: true)
+                            }
+                            
+                            WideButton(title: "Unsafe", background: .nomiDanger, foreground: .white) {
+                                checkAnswer(isSafeAnswer: false)
+                            }
                         }
-
-                        WideButton(title: "Unsafe", background: .nomiDanger, foreground: .white) {
-                            checkAnswer(isSafeAnswer: false)
-                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 44)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 44)
-                    }
+                    .padding(.top, 62)
                     .frame(width: geo.size.width, height: geo.size.height)
-
+                    
+                    NomiBackButton(action: onBack)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .padding(.leading, 20)
+                        .padding(.top, 62)
+                    
                     if showCelebration {
                         Color.black.opacity(0.3)
                             .ignoresSafeArea()
                             .onTapGesture {
                                 finishCelebration()
                             }
-
+                        
                         LottieWrapper(fileName: "confetti")
                             .allowsHitTesting(false)
                             .onAppear {
@@ -114,8 +120,10 @@ struct ScenarioQuizView: View {
     }
     private func checkAnswer(isSafeAnswer: Bool) {
         let correctAnswer = correctAnswers[currentIndex]
-
-        if isSafeAnswer == correctAnswer {
+        let isCorrect = isSafeAnswer == correctAnswer
+        LearningAnalytics.recordQuizAnswer(isCorrect: isCorrect)
+        
+        if isCorrect {
             playCorrectAnswerSound()
             showCelebration = true
         } else {
@@ -131,34 +139,34 @@ struct ScenarioQuizView: View {
         narrationAudio.stop()
         playFeedbackAfterDelay("correct-answer")
     }
-
+    
     private func playWrongAnswerSound() {
         playFeedbackAfterDelay("wrong-answer")
     }
-
+    
     private func playCurrentScenarioAudio() {
         let audioNames = scenarioData.scenarios[currentIndex].audioNames
         narrationAudio.stop()
         narrationTask?.cancel()
-
+        
         narrationTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
             narrationAudio.playSequence(audioNames: audioNames)
         }
     }
-
+    
     private func playFeedbackAfterDelay(_ audioName: String) {
         feedbackAudio.stop()
         feedbackTask?.cancel()
-
+        
         feedbackTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(0.5))
             guard !Task.isCancelled else { return }
             feedbackAudio.play(audioName: audioName)
         }
     }
-
+    
     private func goToNextScenario() {
         if currentIndex < scenarioData.scenarios.count - 1 {
             currentIndex += 1
@@ -167,7 +175,7 @@ struct ScenarioQuizView: View {
             showCongratsPopup = true
         }
     }
-
+    
     private func finishCelebration() {
         guard showCelebration else { return }
         showCelebration = false

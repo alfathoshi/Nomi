@@ -37,7 +37,7 @@ struct FlipCardData {
             frontLabel: "Back Private\nPart",
             frontImage: .card5,
             frontAudioName: "BackPart",
-            realNames: ["Buttocks", "or" ,"Bottom"],
+            realNames: ["Buttock", "or" ,"Bottom"],
             backAudioName: "Buttocks",
             alternativeName: "Bum-bum"
         ),

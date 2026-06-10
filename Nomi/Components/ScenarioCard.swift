@@ -15,7 +15,7 @@ struct ScenarioCard: View {
         VStack() {
             Image(image)
                 .resizable()
-                .scaledToFill()
+                .scaledToFit()
                 .frame(height: 234)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
             Spacer()

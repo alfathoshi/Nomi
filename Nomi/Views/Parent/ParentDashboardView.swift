@@ -30,86 +30,93 @@ struct ParentDashboardView: View {
     private var childName: String {
         profile?.name ?? "Your child"
     }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                HStack {
-                    ChipCapsule(
-                        title: "Parent Mode",
-                        leftIcon: "figure.2.and.child.holdinghands",
-                        foregroundColor: .nomiPrimary,
-                        backgroundColor: .nomiSurfaceTint
-                    )
-                    Spacer()
-                    ChipCapsule(
-                        title: "Exit",
-                        rightIcon: "arrow.right",
-                        foregroundColor: .nomiTextSecondary,
-                        backgroundColor: Color.gray.opacity(0.2),
-                    ) {
-                        onExit()
+        VStack(alignment: .leading, spacing: 0) {
+            headline
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+
+            ScrollView {
+                VStack(alignment: .leading) {
+                    if dashboardData.hasProgress {
+                        progressContent
+                    } else {
+                        ParentDashboardEmptyState()
                     }
                 }
-                    
-                HStack() {
-                        Image(profile?.avatar ?? "Mascot")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(
-                                profile?.avatar == "Mascot" || profile?.avatar == "Pip"
-                                ? 10
-                                : 0
-                            )
-                            .frame(width: 72, height: 72)
-                            .background(
-                                RoundedRectangle(cornerRadius: 21)
-                                    .fill( Color.nomiSurfaceTint)
-                                    .frame(width: 66, height: 66)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 24)
-                                    .stroke(.clear)
-                            )
-                        
-                        VStack(alignment: .leading) {
-                            Text("\(childName)'s Progress")
-                                .font(.heading2())
-                            Text(
-                                "Age \(profile?.age ?? 0) · "
-                                + "\(dashboardData.completedLevels)/\(dashboardData.totalLevels) levels"
-                            )
-                                .font(.label(weight: .regular))
-                        }
-                        Spacer()
-                        VStack(alignment: .leading) {
-                            Text("🌟 0")
-                                .font(.heading2())
-                                .foregroundColor(.nomiAccent)
-                            Text("Total Coins")
-                                .font(.label(weight: .regular))
-                        }
-                    }
-                    
-                    Divider()
-                        .padding(.horizontal, -20)
-                        .padding(.bottom, 20)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(.horizontal, 20)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .navigationBarBackButtonHidden(true)
+    }
 
-                if dashboardData.hasProgress {
-                    progressContent
-                } else {
-                    ParentDashboardEmptyState(childName: childName)
+    private var headline: some View {
+            VStack(alignment: .leading) {
+            HStack {
+                ChipCapsule(
+                    title: "Parent Mode",
+                    leftIcon: "figure.2.and.child.holdinghands",
+                    foregroundColor: .nomiPrimary,
+                    backgroundColor: .nomiSurfaceTint
+                )
+                Spacer()
+                ChipCapsule(
+                    title: "Exit",
+                    rightIcon: "arrow.right",
+                    foregroundColor: .nomiTextSecondary,
+                    backgroundColor: Color.gray.opacity(0.2),
+                ) {
+                    onExit()
                 }
             }
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .topLeading
-            )
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
+
+            HStack {
+                Image(profile?.avatar ?? "Mascot")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(
+                        profile?.avatar == "Mascot" || profile?.avatar == "Pip"
+                        ? 10
+                        : 4
+                    )
+                    .frame(width: 72, height: 72)
+                    .background(
+                        RoundedRectangle(cornerRadius: 21)
+                            .fill(Color.nomiSurfaceTint)
+                            .frame(width: 66, height: 66)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(.clear)
+                    )
+
+                VStack(alignment: .leading) {
+                    Text("\(childName)'s Progress")
+                        .font(.heading2())
+                    Text(
+                        "Age \(profile?.age ?? 0) · "
+                        + "\(dashboardData.completedLevels)/\(dashboardData.totalLevels) levels"
+                    )
+                    .font(.label(weight: .regular))
+                }
+                Spacer()
+                VStack(alignment: .leading) {
+                    Text("🌟 \(dashboardData.totalCoins)")
+                        .font(.heading2())
+                        .foregroundColor(.nomiAccent)
+                    Text("Total Coins")
+                        .font(.label(weight: .regular))
+                }
+            }
+
+            Divider()
+                .padding(.horizontal, -20)
+                .padding(.bottom, 20)
         }
-        .scrollIndicators(.hidden)
-        .navigationBarBackButtonHidden(true)
     }
 
     private var progressContent: some View {
@@ -128,7 +135,7 @@ struct ParentDashboardView: View {
 
                     StatCard(
                         icon: "clock.fill",
-                        value: "—",
+                        value: formattedActiveTime,
                         label: "Time spent today",
                         iconColor: .nomiPrimary
                     )
@@ -142,7 +149,7 @@ struct ParentDashboardView: View {
 
                     StatCard(
                         icon: "checkmark.square.fill",
-                        value: "—",
+                        value: formattedQuizAccuracy,
                         label: "Quiz accuracy",
                         iconColor: .nomiSuccess
                     )
@@ -190,6 +197,26 @@ struct ParentDashboardView: View {
                 y: 2
             )
         }
+    }
+
+    private var formattedActiveTime: String {
+        let totalMinutes = Int(LearningAnalytics.activeTimeToday / 60)
+
+        if totalMinutes < 60 {
+            return "\(totalMinutes) min"
+        }
+
+        let hours = totalMinutes / 60
+        let minutes = totalMinutes % 60
+        return minutes == 0 ? "\(hours) hr" : "\(hours)h \(minutes)m"
+    }
+
+    private var formattedQuizAccuracy: String {
+        guard let accuracy = LearningAnalytics.quizAccuracy else {
+            return "—"
+        }
+
+        return accuracy.formatted(.percent.precision(.fractionLength(0)))
     }
 }
 

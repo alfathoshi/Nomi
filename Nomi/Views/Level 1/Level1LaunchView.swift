@@ -29,12 +29,12 @@ struct Level1LaunchView: View {
                 bridgeScreen
             }
         }
-        .navigationBarBackButtonHidden(true)
         .onAppear {
             startLaunch()
         }
         .onDisappear {
             launchTask?.cancel()
+            rotateToPortrait()
         }
     }
 
@@ -94,7 +94,7 @@ struct Level1LaunchView: View {
 
     private func rotateToLandscape() {
 #if os(iOS)
-        OrientationManager.shared.lock(to: .landscape)
+        OrientationManager.shared.lock(to: .landscapeRight)
         UIDevice.current.setValue(
             UIInterfaceOrientation.landscapeRight.rawValue,
             forKey: "orientation"

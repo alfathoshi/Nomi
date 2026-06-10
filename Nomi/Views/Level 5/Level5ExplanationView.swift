@@ -9,6 +9,7 @@ import SwiftUI
 
 struct Level5ExplanationView: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     private enum Phase {
         case explanation
@@ -32,17 +33,32 @@ struct Level5ExplanationView: View {
             case .explanation:
                 explanationView
             case .childPromise:
-                ChildPromiseView {
-                    phase = .parentPromise
-                }
+                ChildPromiseView(
+                    onComplete: {
+                        phase = .parentPromise
+                    },
+                    onBack: {
+                        phase = .explanation
+                    }
+                )
             case .parentPromise:
-                ParentPromiseView {
-                    phase = .pinkyPromise
-                }
+                ParentPromiseView(
+                    onComplete: {
+                        phase = .pinkyPromise
+                    },
+                    onBack: {
+                        phase = .childPromise
+                    }
+                )
             case .pinkyPromise:
-                PinkyPromiseView {
-                    phase = .congratulations
-                }
+                PinkyPromiseView(
+                    onComplete: {
+                        phase = .congratulations
+                    },
+                    onBack: {
+                        phase = .parentPromise
+                    }
+                )
             case .congratulations:
                 CongratsView(onComplete: onComplete)
             }
@@ -75,6 +91,7 @@ struct Level5ExplanationView: View {
                 Text(" Go invite a Parent, Guardian, or safe grown-up to join you for a special \(highlight)").font(.heading2(weight: .semiBold, size: 20))
             ],
             buttonTitle: "My Trusted Adult is Here",
+            onBack: onBack
         ) {
             audio.stop()
             showParentPasscode = true
