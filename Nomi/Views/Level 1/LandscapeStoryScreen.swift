@@ -28,6 +28,8 @@ enum TextSize: String, CaseIterable {
 }
 
 struct LandscapeStoryScreen: View {
+    @Environment(\.returnToRoadmap) private var returnToRoadmap
+
     let book: StoryBook = NomiAdventureData.storybook
 
     @State private var currentIndex: Int = 0
@@ -44,10 +46,8 @@ struct LandscapeStoryScreen: View {
     private var currentPage: StoryPage { pages[currentIndex] }
     private var canGoPrev: Bool { currentIndex > 0 }
     private var canGoNext: Bool { currentIndex < pages.count - 1 }
-    @State private var navigateToWordScreen = false
     @State private var showCongratsPopup = false
     @State private var showCelebration = false
-    @State private var showStoryTransition = false
 
     var body: some View {
         GeometryReader { geo in
@@ -84,75 +84,20 @@ struct LandscapeStoryScreen: View {
                 }
 
                 if showCongratsPopup {
-                    Color.black.opacity(0.45)
-                        .frame(width: geo.size.width, height: geo.size.height)
-                        .ignoresSafeArea()
-                        .onTapGesture {
+                    CongratsPopUp(
+                        title: "Level 1 Complete",
+                        mascotImage: "NomiHome",
+                        buttonTitle: "Next",
+                        onDismiss: {
                             showCongratsPopup = false
+                        },
+                        onNext: {
+                            finishLevel()
                         }
-                        .zIndex(10)
-
-                    VStack(spacing: 18) {
-                        Text("Story Complete")
-                            .font(.heading1())
-                            .foregroundColor(.nomiTextPrimary)
-                            .padding(.top, 20)
-
-                        Image("NomiHome")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 170)
-
-                        Button(action: {
-                            goToDoctorWordsScreen()
-                        }) {
-                            HStack(spacing: 8) {
-                                Text("Next Level")
-                                    .font(.heading3())
-                                    .foregroundColor(.white)
-
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.horizontal, 38)
-                            .padding(.vertical, 14)
-                            .background(Color.nomiPrimary)
-                            .clipShape(Capsule())
-                        }
-                        .padding(.bottom, 20)
-                    }
-                    .frame(width: min(geo.size.width * 0.36, 360))
-                    .background(Color.nomiSurfaceTint)
-                    .clipShape(RoundedRectangle(cornerRadius: 28))
-                    .shadow(color: .black.opacity(0.2), radius: 16, y: 8)
-                    .zIndex(11)
+                    )
+                    .zIndex(100)
                 }
 
-                if showStoryTransition {
-                    GeometryReader { geo in
-                        ZStack {
-                            Image(.storyBackground)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: geo.size.width, height: geo.size.height)
-                                .clipped()
-
-                            VStack(spacing: 20) {
-                                ProgressView()
-                                    .scaleEffect(1.8)
-                                    .tint(.white)
-
-                                Text("Preparing next level...")
-                                    .font(.heading3())
-                                    .foregroundColor(.nomiTextPrimary)
-                            }
-                        }
-                        .frame(width: geo.size.width, height: geo.size.height)
-                    }
-                    .ignoresSafeArea()
-                    .zIndex(20)
-                }
             }
         }
         .ignoresSafeArea()
@@ -164,10 +109,6 @@ struct LandscapeStoryScreen: View {
             playCurrentPageAudio(afterSeconds: 1.0)
         }
         .onDisappear {
-            #if os(iOS)
-            OrientationManager.shared.unlock()
-            #endif
-
             audio.stop()
         }
         .onChange(of: currentIndex) { _, newValue in
@@ -182,17 +123,6 @@ struct LandscapeStoryScreen: View {
                 return
             }
             playCurrentPageAudio(afterSeconds: 1.3)
-        }
-        .navigationDestination(isPresented: $navigateToWordScreen) {
-            Level2ExplanationScreen()
-                .navigationBarBackButtonHidden(true)
-                .onAppear {
-#if os(iOS)
-                    OrientationManager.shared.lock(to: .portrait)
-                    UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-                    UIViewController.attemptRotationToDeviceOrientation()
-#endif
-                }
         }
         .overlay {
             if showContents {
@@ -448,21 +378,10 @@ struct LandscapeStoryScreen: View {
         }
     }
 
-    private func goToDoctorWordsScreen() {
+    private func finishLevel() {
         audio.stop()
         showCongratsPopup = false
-        showStoryTransition = true
-
-#if os(iOS)
-        OrientationManager.shared.lock(to: .portrait)
-        UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-        UIViewController.attemptRotationToDeviceOrientation()
-#endif
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            navigateToWordScreen = true
-            showStoryTransition = false
-        }
+        returnToRoadmap()
     }
 
     var config: PageCurlCarouselConfig {

@@ -46,7 +46,7 @@ struct TopicCard: View {
                         .font(.system(size: 70))
                         .foregroundColor(.nomiPrimary.opacity(0.3))
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                        .padding(.trailing, 16)
+                        .padding(.trailing, 0)
                 }
 
                 // content
@@ -88,7 +88,20 @@ struct TopicCard: View {
                     .fill(Color.nomiSurfaceTint)
             )
             .clipShape(RoundedRectangle(cornerRadius: 24))
-            .saturation(isLocked ? 0.2 : 1.0)
+            .overlay {
+                if isLocked {
+                    ZStack(alignment: .center) {
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(Color.black.opacity(0.35))
+
+                        Image(.lock)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 64, height: 64)
+                            .padding(12)
+                    }
+                }
+            }
             .shadow(radius: 4, x: 0, y: 4)
         }
         .buttonStyle(CardButtonStyle())

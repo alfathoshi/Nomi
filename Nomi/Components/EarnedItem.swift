@@ -15,7 +15,7 @@ struct EarnedItem: View {
     var body: some View {
         HStack(spacing: 24) {
             Text(emoji)
-                .font(.system(size: 35))
+                .font(.system(size: 25))
                 .frame(width: 50, height: 50)
                 .background(backgroundColor)
                 .clipShape(Circle())

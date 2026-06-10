@@ -9,6 +9,8 @@ import SwiftUI
 import AVFoundation
 
 struct Level3ExplanationView: View {
+    var onComplete: () -> Void = {}
+
     let highlight1 = Text("Private Part")
         .foregroundColor(.nomiPrimary)
         .font(.heading3())
@@ -18,7 +20,10 @@ struct Level3ExplanationView: View {
     @State private var navigateToWordSorting = false
     @State private var audioPlayer: AVAudioPlayer?
     var body: some View {
-        NavigationStack {
+        Group {
+            if navigateToWordSorting {
+                WordSortingView(onComplete: onComplete)
+            } else {
             LevelExplanationScreen(
                 title: "Doctor's Words",
                 mascotImage: "NomiDoctor",
@@ -36,12 +41,10 @@ struct Level3ExplanationView: View {
             .onDisappear {
                 stopNarration()
             }
-            .navigationDestination(isPresented: $navigateToWordSorting) {
-                WordSortingView()
-                    .navigationBarBackButtonHidden(true)
             }
         }
     }
+
     private func playNarration(named fileName: String, fileExtension: String) {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
             print("Narration audio not found: \(fileName).\(fileExtension)")

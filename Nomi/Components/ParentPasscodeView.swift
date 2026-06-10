@@ -15,12 +15,26 @@ struct ParentPasscodeView: View {
         GridItem(.flexible(), spacing: 10),
     ]
 
-    @State private var service = ParentZoneViewModel()
+    @State private var service: ParentZoneViewModel
+
+    init(
+        mode: ParentPinMode? = nil,
+        onAuthenticated: @escaping () -> Void,
+        onBack: @escaping () -> Void
+    ) {
+        self.onAuthenticated = onAuthenticated
+        self.onBack = onBack
+        _service = State(
+            initialValue: ParentZoneViewModel(initialMode: mode)
+        )
+    }
 
     var body: some View {
         VStack {
-            Text("🔐")
-                .font(.system(size: 64))
+            Image(.lock)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 64, height: 64)
 
             Text(service.title)
                 .font(.heading2())
@@ -57,16 +71,14 @@ struct ParentPasscodeView: View {
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(1...9, id: \.self) { digit in
                     KeypadButton(value: String(digit)) {
-                        service.handleDigit(String(digit))
+                        enterDigit(String(digit))
                     }
                 }
 
-                KeypadButton(value: "👆") {
-                    submitPin()
-                }
+                Color.clear
 
                 KeypadButton(value: "0") {
-                    service.handleDigit("0")
+                    enterDigit("0")
                 }
 
                 Button {
@@ -91,6 +103,13 @@ struct ParentPasscodeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding(.horizontal, 20)
         .padding(.top, 40)
+    }
+
+    private func enterDigit(_ digit: String) {
+        service.handleDigit(digit)
+
+        guard service.enteredPin.count == 4 else { return }
+        submitPin()
     }
 
     private func submitPin() {

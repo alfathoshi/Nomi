@@ -24,33 +24,27 @@ struct WideButton: View {
     }
 
     var body: some View {
-
         Button(action: action) {
-
             HStack(spacing: 8) {
                 Text(title)
                     .font(.button())
-                    .foregroundStyle(foreground  ?? .white)
+
                 if let icon {
                     Image(systemName: icon)
-                        .foregroundStyle(foreground ?? .white)
                 }
             }
+            .foregroundStyle(foreground ?? .white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(background ?? Color.nomiPrimary)
-            .clipShape(
-                RoundedRectangle(
-                    cornerRadius: 24
-                )
-            )
             .shadow(
-                color: Color.nomiPrimary.opacity(0.35),
+                color: (background ?? Color.nomiPrimary).opacity(0.35),
                 radius: 20,
                 x: 0,
                 y: 6
             )
         }
+        .buttonStyle(.glassProminent)
+        .tint(background ?? Color.nomiPrimary)
     }
 }
 

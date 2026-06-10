@@ -8,17 +8,26 @@
 import SwiftUI
 
 struct ParentZoneView: View {
-    @Binding var path: NavigationPath
+    var onExit: () -> Void = {}
+
+    @State private var isAuthenticated = false
 
     var body: some View {
-        ParentPasscodeView {
-            path.append(Route.parentDashboard)
-        } onBack: {
-            path = NavigationPath()
+        Group {
+            if isAuthenticated {
+                ParentDashboardView(onExit: onExit)
+            } else {
+                ParentPasscodeView {
+                    isAuthenticated = true
+                } onBack: {
+                    onExit()
+                }
+            }
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
-    ParentZoneView(path: .constant(NavigationPath()))
+    ParentZoneView()
 }

@@ -52,9 +52,14 @@ struct ParentDashboardView: View {
                 }
                     
                 HStack() {
-                        Text(profile?.avatar ?? "👦")
-                            .font(.display())
-                            .foregroundColor( .nomiTextPrimary)
+                        Image(profile?.avatar ?? "Mascot")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(
+                                profile?.avatar == "Mascot" || profile?.avatar == "Pip"
+                                ? 10
+                                : 0
+                            )
                             .frame(width: 72, height: 72)
                             .background(
                                 RoundedRectangle(cornerRadius: 21)

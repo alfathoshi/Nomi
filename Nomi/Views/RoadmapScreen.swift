@@ -7,55 +7,90 @@
 
 import SwiftUI
 
+private struct ReturnToRoadmapKey: EnvironmentKey {
+    static let defaultValue: () -> Void = {}
+}
+
+extension EnvironmentValues {
+    var returnToRoadmap: () -> Void {
+        get { self[ReturnToRoadmapKey.self] }
+        set { self[ReturnToRoadmapKey.self] = newValue }
+    }
+}
+
 struct RoadmapScreen: View {
+    var onReturnHome: () -> Void = {}
+
+    @AppStorage(LearningProgress.completedLevelsKey)
+    private var completedLevels = 0
+
+    @State private var selectedLevel = 1
+    @State private var isShowingLevel = false
+
     let nodes: [RoadmapNodeData] = RoadmapData.nodes
     
     var body: some View {
+        roadmap
+            .ignoresSafeArea()
+            .navigationDestination(isPresented: $isShowingLevel) {
+                LevelDestination(
+                    level: selectedLevel,
+                    onReturnHome: returnHome
+                )
+                    .navigationBarBackButtonHidden(true)
+            }
+            .onAppear {
+                lockToPortrait()
+            }
+    }
+
+    private var roadmap: some View {
         GeometryReader { geo in
             ZStack {
-                // Background
                 Image(.roadmapBackground)
                     .resizable()
                     .scaledToFill()
+                    .frame(
+                        width: screenSize.width,
+                        height: screenSize.height
+                    )
                     .clipped()
-//                    .overlay(
-//                        Color.nomiPrimarySoft
-//                            .opacity(0.80)
-//                            .blendMode(.overlay)
-//                    )
+                    .ignoresSafeArea()
 
-                // Nodes
                 ForEach(0..<nodes.count, id: \.self) { i in
-                    nodeView(for: nodes[i])
-                        .position(
-                            x: geo.size.width * nodes[i].x,
-                            y: geo.size.height * nodes[i].y
-                        )
-                }
+                    let node = nodes[i]
+                    let state = state(for: node)
 
-                VStack {
-                    Spacer()
-                    HStack {
-                        MascotBubble(message: "Don't worry, I'm here")
-                            .padding(.leading, 10)
-                            .padding(.bottom, 230)
-                        Spacer()
+                    Button {
+                        guard state != .locked,
+                              let level = node.levelLabel?.level else { return }
+                        selectedLevel = level
+                        isShowingLevel = true
+                    } label: {
+                        nodeView(for: node)
                     }
+                    .buttonStyle(.plain)
+                    .disabled(state == .locked)
+                    .position(
+                        x: geo.size.width * node.x,
+                        y: geo.size.height * node.y
+                    )
                 }
             }
         }
-        .ignoresSafeArea()
     }
     
     @ViewBuilder
     func nodeView(for node: RoadmapNodeData) -> some View {
+        let state = state(for: node)
+
         VStack(spacing: 6) {
     
             if let label = node.levelLabel, label.position == .above {
                 LevelBadge(level: label.level, title: label.title, pointerUp: false)
             }
 
-            circleView(for: node)
+            circleView(for: node, state: state)
 
             if let label = node.levelLabel, label.position == .below {
                 LevelBadge(level: label.level, title: label.title, pointerUp: true)
@@ -64,8 +99,8 @@ struct RoadmapScreen: View {
     }
 
     @ViewBuilder
-    func circleView(for node: RoadmapNodeData) -> some View {
-        switch node.state {
+    func circleView(for node: RoadmapNodeData, state: NodeState) -> some View {
+        switch state {
         case .completed:
             Image(node.icon)
                 .resizable()
@@ -80,19 +115,90 @@ struct RoadmapScreen: View {
                 .scaledToFit()
                 .frame(width: 90, height: 90)
                 .clipShape(Circle())
+                .overlay(Circle().stroke(.white.opacity(0.9), lineWidth: 4))
                 .shadow(color: .white.opacity(0.9), radius: 15)
-                .shadow(color: Color.nomiPrimary.opacity(0.5), radius: 25)
+                .shadow(color: Color.nomiPrimary.opacity(0.8), radius: 25)
 
         case .locked:
-            Image(node.icon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 70, height: 70)
-                .clipShape(Circle())
-                .opacity(0.6)
+            ZStack {
+                Image(node.icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 70, height: 70)
+                    .clipShape(Circle())
+
+                Circle()
+                    .fill(Color.black.opacity(0.55))
+                    .frame(width: 70, height: 70)
+
+                Image(.lock)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 34, height: 34)
+            }
         }
     }
 
+    private func state(for node: RoadmapNodeData) -> NodeState {
+        guard let level = node.levelLabel?.level else { return .locked }
+
+        let progress = min(
+            max(completedLevels, 0),
+            LearningProgress.totalLevels
+        )
+
+        if level <= progress {
+            return .completed
+        }
+
+        return level == progress + 1 ? .current : .locked
+    }
+
+    private func lockToPortrait() {
+#if os(iOS)
+        OrientationManager.shared.lock(to: .portrait)
+        UIDevice.current.setValue(
+            UIInterfaceOrientation.portrait.rawValue,
+            forKey: "orientation"
+        )
+        UIViewController.attemptRotationToDeviceOrientation()
+#endif
+    }
+
+    private func returnHome() {
+        isShowingLevel = false
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            onReturnHome()
+        }
+    }
+
+}
+
+private struct LevelDestination: View {
+    @Environment(\.dismiss) private var dismiss
+
+    let level: Int
+    let onReturnHome: () -> Void
+
+    @ViewBuilder
+    var body: some View {
+        switch level {
+        case 1:
+            Level1LaunchView()
+                .environment(\.returnToRoadmap, dismiss.callAsFunction)
+        case 2:
+            Level2ExplanationScreen(onComplete: dismiss.callAsFunction)
+        case 3:
+            Level3ExplanationView(onComplete: dismiss.callAsFunction)
+        case 4:
+            Level4ExplanationView(onComplete: dismiss.callAsFunction)
+        case 5:
+            Level5ExplanationView(onComplete: onReturnHome)
+        default:
+            EmptyView()
+        }
+    }
 }
 
 #Preview {

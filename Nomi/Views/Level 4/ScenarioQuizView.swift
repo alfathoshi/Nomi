@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ScenarioQuizView: View {
+    var onComplete: () -> Void = {}
+
     private let scenarioData = ScenarioData()
     private let correctAnswers: [Bool] = [false, true]
     @StateObject private var narrationAudio = AudioManager()
@@ -15,7 +17,6 @@ struct ScenarioQuizView: View {
     
     @State private var currentIndex = 0
     @State private var shakeAmount: CGFloat = 0
-    @State private var navigateToTrustContract: Bool = false
     @State private var showCelebration = false
     @State private var showCongratsPopup = false
     
@@ -80,21 +81,18 @@ struct ScenarioQuizView: View {
                         CongratsPopUp(
                             title: "Level 4 Complete",
                             mascotImage: "NomiHome",
-                            buttonTitle: "Next Level",
+                            buttonTitle: "Next",
                             onDismiss: {
                                 showCongratsPopup = false
                             },
                             onNext: {
                                 showCongratsPopup = false
-                                navigateToTrustContract = true
+                                onComplete()
                             }
                         )
+                        .zIndex(100)
                     }
                 }
-            }
-            .navigationDestination(isPresented: $navigateToTrustContract) {
-                Level5ExplanationView()
-                    .navigationBarBackButtonHidden(true)
             }
             .ignoresSafeArea()
             .toolbar(.hidden, for: .navigationBar)

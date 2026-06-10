@@ -12,12 +12,13 @@ let cardHeight: CGFloat = 390
 let cardCornerRadius: CGFloat = 32
 
 struct FlipCardScreen: View {
+    var onComplete: () -> Void = {}
+
     let cards: [FlipCard] = FlipCardData.cards
 
     @State private var currentIndex = 0
     @State private var showCompletionPopup = false
     @State private var showConfetti = false
-    @State private var navigateToWordSorting: Bool = false
     @StateObject private var audio = AudioManager()
     private var currentCard: FlipCard {
         cards[currentIndex]
@@ -58,12 +59,18 @@ struct FlipCardScreen: View {
             }
 
             if showCompletionPopup {
-                completionPopup
+                CongratsPopUp(
+                    title: "Level 2 Complete",
+                    mascotImage: "NomiDoctor",
+                    buttonTitle: "Next",
+                    onDismiss: dismissPopup,
+                    onNext: {
+                        showCompletionPopup = false
+                        onComplete()
+                    }
+                )
+                .zIndex(100)
             }
-        }
-        .navigationDestination(isPresented: $navigateToWordSorting) {
-            Level3ExplanationView()
-                .navigationBarBackButtonHidden(true)
         }
         .onDisappear {
             audio.stop()
@@ -122,57 +129,6 @@ struct FlipCardScreen: View {
             withAnimation(.easeInOut(duration: 0.5)) {
                 currentIndex += 1
             }
-        }
-    }
-
-    private var completionPopup: some View {
-        ZStack {
-
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .transition(.opacity)
-                .onTapGesture {
-                    dismissPopup()
-                }
-
-            VStack(spacing: 24) {
-                Text("Level 2 Complete")
-                    .font(.heading1())
-                    .foregroundColor(.nomiTextPrimary)
-                    .padding(.top, 24)
-
-                Image("NomiDoctor")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 200)
-
-                Button(action: {
-                    showCompletionPopup = false
-                    navigateToWordSorting = true
-                }) {
-                    HStack(spacing: 8) {
-                        Text("Next Level")
-                            .font(.heading3())
-                            .foregroundColor(.white)
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Capsule().fill(Color.nomiPrimary))
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
-            }
-            .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 32)
-                    .fill(.white)
-            )
-            .padding(.horizontal, 32)
-            .shadow(color: .black.opacity(0.2), radius: 20, y: 10)
-            .transition(.scale(scale: 0.7).combined(with: .opacity))
         }
     }
 
