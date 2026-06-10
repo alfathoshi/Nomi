@@ -56,5 +56,6 @@ struct ChipCapsule: View {
             .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .tapSound()
     }
 }

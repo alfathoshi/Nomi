@@ -14,6 +14,8 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var isMuted: Bool = false
     @Published var isPlaying: Bool = false
 
+    var onPlaybackFinished: (() -> Void)?
+
     private var player: AVAudioPlayer?
     private var queuedAudioURLs: [URL] = []
 
@@ -105,6 +107,9 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        if queuedAudioURLs.isEmpty {
+            onPlaybackFinished?()
+        }
         playNextQueuedAudio()
     }
 

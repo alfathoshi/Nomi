@@ -69,6 +69,7 @@ struct RoadmapScreen: View {
                         nodeView(for: node)
                     }
                     .buttonStyle(.plain)
+                    .tapSound()
                     .disabled(state == .locked)
                     .position(
                         x: geo.size.width * node.x,

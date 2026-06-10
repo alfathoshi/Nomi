@@ -110,6 +110,7 @@ struct StoryContentsGrid: View {
             }
         }
         .buttonStyle(.plain)
+        .tapSound()
     }
 }
 

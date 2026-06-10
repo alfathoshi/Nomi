@@ -38,6 +38,8 @@ struct LandscapeStoryScreen: View {
     @State private var textSize: TextSize = .medium
     @State private var multiJumpTarget: Int? = nil
     @State private var audioPlayTask: Task<Void, Never>? = nil
+    @State private var isAutoScrolling: Bool = false
+    @State private var autoScrollTask: Task<Void, Never>? = nil
     @StateObject private var audio = AudioManager()
 
     var onHome: () -> Void = {}
@@ -106,10 +108,19 @@ struct LandscapeStoryScreen: View {
             OrientationManager.shared.lock(to: .landscape)
             #endif
 
+            audio.onPlaybackFinished = {
+                if isAutoScrolling {
+                    scheduleAdvanceAfterDelay()
+                }
+            }
+
             playCurrentPageAudio(afterSeconds: 1.0)
         }
         .onDisappear {
             audio.stop()
+            autoScrollTask?.cancel()
+            autoScrollTask = nil
+            isAutoScrolling = false
         }
         .onChange(of: currentIndex) { _, newValue in
             if let target = multiJumpTarget {
@@ -152,6 +163,10 @@ struct LandscapeStoryScreen: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(20)
+
+            autoToggle
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 20)
 
             VStack(alignment: .trailing, spacing: 8) {
                 soundButton
@@ -214,6 +229,39 @@ struct LandscapeStoryScreen: View {
                 .background(Circle().fill(.white))
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
         }
+    }
+
+    private var autoToggle: some View {
+        Button {
+            setAutoScrolling(!isAutoScrolling)
+        } label: {
+            HStack(spacing: 10) {
+                Text("Auto")
+                    .font(.label(weight: .bold))
+                    .foregroundColor(.nomiPrimary)
+
+                ZStack {
+                    Capsule()
+                        .fill(isAutoScrolling ? Color.nomiPrimary : Color.gray.opacity(0.35))
+                        .frame(width: 42, height: 26)
+
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 22, height: 22)
+                        .shadow(color: .black.opacity(0.2), radius: 1.5, y: 1)
+                        .offset(x: isAutoScrolling ? 8 : -8)
+                }
+                .animation(.spring(response: 0.25, dampingFraction: 0.75), value: isAutoScrolling)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+            .background(Capsule().fill(.white))
+            .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+        }
+        .buttonStyle(.plain)
+        .tapSound()
+        .accessibilityLabel("Auto scroll")
+        .accessibilityValue(isAutoScrolling ? "On" : "Off")
     }
 
     private var pageCounter: some View {
@@ -300,6 +348,7 @@ struct LandscapeStoryScreen: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .tapSound()
     }
 
     private var storyTextOverlay: some View {
@@ -374,6 +423,32 @@ struct LandscapeStoryScreen: View {
             }
             if let name = currentPage.audioName {
                 audio.play(audioName: name, volume: 5)
+            }
+        }
+    }
+
+    private func setAutoScrolling(_ on: Bool) {
+        isAutoScrolling = on
+        if on {
+            if !audio.isPlaying {
+                scheduleAdvanceAfterDelay()
+            }
+        } else {
+            autoScrollTask?.cancel()
+            autoScrollTask = nil
+        }
+    }
+
+    private func scheduleAdvanceAfterDelay() {
+        autoScrollTask?.cancel()
+        autoScrollTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled, isAutoScrolling else { return }
+
+            if currentIndex < pages.count - 1 {
+                goToPage(currentIndex + 1)
+            } else {
+                isAutoScrolling = false
             }
         }
     }

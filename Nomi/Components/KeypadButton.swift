@@ -65,5 +65,6 @@ struct KeypadButton: View {
             )
         }
         .buttonStyle(.plain)
+        .tapSound()
     }
 }
