@@ -19,6 +19,8 @@ struct ScenarioQuizView: View {
     @State private var shakeAmount: CGFloat = 0
     @State private var showCelebration = false
     @State private var showCongratsPopup = false
+    @State private var narrationTask: Task<Void, Never>?
+    @State private var feedbackTask: Task<Void, Never>?
     
     var body: some View {
         NavigationStack {
@@ -103,6 +105,8 @@ struct ScenarioQuizView: View {
                 playCurrentScenarioAudio()
             }
             .onDisappear {
+                narrationTask?.cancel()
+                feedbackTask?.cancel()
                 narrationAudio.stop()
                 feedbackAudio.stop()
             }
@@ -123,17 +127,36 @@ struct ScenarioQuizView: View {
     }
     
     private func playCorrectAnswerSound() {
+        narrationTask?.cancel()
         narrationAudio.stop()
-        feedbackAudio.play(audioName: "correct-answer")
+        playFeedbackAfterDelay("correct-answer")
     }
 
     private func playWrongAnswerSound() {
-        feedbackAudio.play(audioName: "wrong-answer")
+        playFeedbackAfterDelay("wrong-answer")
     }
 
     private func playCurrentScenarioAudio() {
         let audioNames = scenarioData.scenarios[currentIndex].audioNames
-        narrationAudio.playSequence(audioNames: audioNames)
+        narrationAudio.stop()
+        narrationTask?.cancel()
+
+        narrationTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            narrationAudio.playSequence(audioNames: audioNames)
+        }
+    }
+
+    private func playFeedbackAfterDelay(_ audioName: String) {
+        feedbackAudio.stop()
+        feedbackTask?.cancel()
+
+        feedbackTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(0.5))
+            guard !Task.isCancelled else { return }
+            feedbackAudio.play(audioName: audioName)
+        }
     }
 
     private func goToNextScenario() {

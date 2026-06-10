@@ -31,7 +31,6 @@ struct RoadmapScreen: View {
     
     var body: some View {
         roadmap
-            .ignoresSafeArea()
             .navigationDestination(isPresented: $isShowingLevel) {
                 LevelDestination(
                     level: selectedLevel,
@@ -166,11 +165,7 @@ struct RoadmapScreen: View {
     }
 
     private func returnHome() {
-        isShowingLevel = false
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            onReturnHome()
-        }
+        onReturnHome()
     }
 
 }
@@ -185,7 +180,7 @@ private struct LevelDestination: View {
     var body: some View {
         switch level {
         case 1:
-            Level1LaunchView()
+            Level1LaunchView(onReturnHome: onReturnHome)
                 .environment(\.returnToRoadmap, dismiss.callAsFunction)
         case 2:
             Level2ExplanationScreen(onComplete: dismiss.callAsFunction)

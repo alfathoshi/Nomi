@@ -19,6 +19,7 @@ struct FlipCardScreen: View {
     @State private var currentIndex = 0
     @State private var showCompletionPopup = false
     @State private var showConfetti = false
+    @State private var audioPlayTask: Task<Void, Never>?
     @StateObject private var audio = AudioManager()
     private var currentCard: FlipCard {
         cards[currentIndex]
@@ -73,6 +74,7 @@ struct FlipCardScreen: View {
             }
         }
         .onDisappear {
+            audioPlayTask?.cancel()
             audio.stop()
         }
     }
@@ -98,7 +100,7 @@ struct FlipCardScreen: View {
             FlippableCardView(
                 card: currentCard,
                 onPlayAudio: { audioName in
-                    audio.play(audioName: audioName)
+                    playAudioAfterDelay(audioName)
                 },
                 onNext: nextCard
             )
@@ -113,7 +115,7 @@ struct FlipCardScreen: View {
     private func nextCard() {
         if currentIndex >= cards.count - 1 {
             audio.stop()
-            audio.play(audioName: "correct-answer")
+            playAudioAfterDelay("correct-answer")
             LearningProgress.complete(level: 2)
             showConfetti = true
 
@@ -136,6 +138,17 @@ struct FlipCardScreen: View {
         withAnimation(.easeInOut(duration: 0.3)) {
             showCompletionPopup = false
             currentIndex = 0
+        }
+    }
+
+    private func playAudioAfterDelay(_ audioName: String) {
+        audio.stop()
+        audioPlayTask?.cancel()
+
+        audioPlayTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(0.5))
+            guard !Task.isCancelled else { return }
+            audio.play(audioName: audioName)
         }
     }
 }

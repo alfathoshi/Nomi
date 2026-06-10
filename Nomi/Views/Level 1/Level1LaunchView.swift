@@ -8,6 +8,8 @@ import SwiftUI
 struct Level1LaunchView: View {
     @Environment(\.returnToRoadmap) private var returnToRoadmap
 
+    var onReturnHome: () -> Void = {}
+
     private enum Phase {
         case preparing
         case rotating
@@ -21,7 +23,7 @@ struct Level1LaunchView: View {
     var body: some View {
         Group {
             if phase == .story {
-                LandscapeStoryScreen()
+                LandscapeStoryScreen(onHome: returnHomeFromStory)
                     .environment(\.returnToRoadmap, returnFromStory)
             } else {
                 bridgeScreen
@@ -115,6 +117,14 @@ struct Level1LaunchView: View {
     }
 
     private func returnFromStory() {
+        returnFromStory(to: returnToRoadmap)
+    }
+
+    private func returnHomeFromStory() {
+        returnFromStory(to: onReturnHome)
+    }
+
+    private func returnFromStory(to destination: @escaping () -> Void) {
         launchTask?.cancel()
         phase = .returning
         rotateToPortrait()
@@ -124,7 +134,7 @@ struct Level1LaunchView: View {
             guard !Task.isCancelled else { return }
 
             launchTask = nil
-            returnToRoadmap()
+            destination()
         }
     }
 
