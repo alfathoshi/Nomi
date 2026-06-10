@@ -6,6 +6,9 @@
 //
 
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct TopicCard: View {
     let number: Int
@@ -149,13 +152,20 @@ struct TopicCard: View {
     }
 }
 
-// Custom Button Style (bouncy tap feedback)
+// Custom Button Style (snappy tap feedback + click sound)
 struct CardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.93 : 1.0)
             .opacity(configuration.isPressed ? 0.9 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+            .animation(.easeOut(duration: 0.06), value: configuration.isPressed)
+            .onChange(of: configuration.isPressed) { _, isPressed in
+                guard isPressed else { return }
+                SoundEffectsPlayer.shared.play("ClickButton", fileExtension: "m4a", volume: 1.5)
+                #if canImport(UIKit)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                #endif
+            }
     }
 }
 

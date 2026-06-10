@@ -45,6 +45,7 @@ struct WideButton: View {
         }
         .buttonStyle(.glassProminent)
         .tint(background ?? Color.nomiPrimary)
+        .tapSound()
     }
 }
 

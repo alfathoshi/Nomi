@@ -78,6 +78,7 @@ struct HomeScreen: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            .tapSound()
                         }
                         .padding(.horizontal, 40)
                         .zIndex(2)

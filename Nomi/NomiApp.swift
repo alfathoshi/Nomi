@@ -36,6 +36,7 @@ struct NomiApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .buttonStyle(SoundButtonStyle())
         }
         .modelContainer(sharedModelContainer)
     }
