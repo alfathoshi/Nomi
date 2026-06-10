@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PinkyPromiseView: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     @State private var showConfetti = false
     @StateObject private var audio = AudioManager()
@@ -23,13 +24,12 @@ struct PinkyPromiseView: View {
                     .ignoresSafeArea()
                 
                 VStack() {
+                    Spacer()
                     Text("PINKY PROMISE")
                         .font(.heading1(size: 40))
                         .foregroundColor(.nomiPrimary)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 90)
-                    
-                    Spacer()
+                        .padding(.top, 56)
                     
                     VStack(spacing: 0) {
                         Image(.level5)
@@ -59,7 +59,7 @@ struct PinkyPromiseView: View {
                         
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 40)
+                    .padding(.vertical, 36)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
                             .fill(Color.nomiSurfaceTint)
@@ -77,6 +77,21 @@ struct PinkyPromiseView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 20)
+
+                NomiBackButton(action: onBack)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.leading, 20)
+                    .padding(.top, 62)
+
+                AudioMuteButton(isMuted: audio.isMuted) {
+                    audio.toggleMute()
+                    if !audio.isMuted {
+                        audio.play(audioName: "PinkyPromise")
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.trailing, 20)
+                .padding(.top, 62)
 
                 if showConfetti {
                     Color.black.opacity(0.25)

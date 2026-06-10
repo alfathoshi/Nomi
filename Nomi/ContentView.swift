@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
+
     @State private var launchPhase: LaunchPhase = .splash
     @State private var isSplashVisible = true
     @State private var nextLaunchPhase: LaunchPhase?
@@ -27,6 +29,18 @@ struct ContentView: View {
                     finishSplash(hasProfile: hasProfile)
                 }
                 .opacity(isSplashVisible ? 1 : 0)
+            }
+        }
+        .onAppear {
+            if scenePhase == .active {
+                AppUsageTracker.shared.start()
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                AppUsageTracker.shared.start()
+            } else {
+                AppUsageTracker.shared.stop()
             }
         }
     }
@@ -58,7 +72,11 @@ struct ContentView: View {
                 }
             }
         case .main:
-            MainNavigationView()
+            MainNavigationView {
+                nextLaunchPhase = nil
+                isSplashVisible = true
+                launchPhase = .splash
+            }
         }
     }
 }
@@ -70,6 +88,8 @@ private enum LaunchPhase: Equatable {
 }
 
 private struct MainNavigationView: View {
+    let onLogout: () -> Void
+
     @State private var showRoadmap = false
     @State private var showParentZone = false
 
@@ -89,9 +109,12 @@ private struct MainNavigationView: View {
                 }
             }
             .navigationDestination(isPresented: $showParentZone) {
-                ParentZoneView {
-                    showParentZone = false
-                }
+                ParentZoneView(
+                    onExit: {
+                        showParentZone = false
+                    },
+                    onLogout: onLogout
+                )
             }
         }
     }

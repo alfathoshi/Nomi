@@ -13,6 +13,9 @@ struct LevelExplanationScreen: View {
     let mascotImage: String
     let paragraphs: [Text]
     let buttonTitle: String
+    let onBack: () -> Void
+    var isMuted: Bool? = nil
+    var onToggleMute: () -> Void = {}
     let onStart: () -> Void
 
     var body: some View {
@@ -27,7 +30,8 @@ struct LevelExplanationScreen: View {
                 .clipped()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack() {
+                Spacer()
                 Text(title)
                     .font(.heading1(weight: .extraBold, size: 40))
                     .foregroundColor(.nomiTextPrimary)
@@ -61,6 +65,18 @@ struct LevelExplanationScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 44)
             }
+
+            NomiBackButton(action: onBack)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.leading, 20)
+            .padding(.top, 62)
+
+            if let isMuted {
+                AudioMuteButton(isMuted: isMuted, action: onToggleMute)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.trailing, 20)
+                    .padding(.top, 62)
+            }
         }
     }
 }
@@ -73,6 +89,7 @@ struct LevelExplanationScreen: View {
             Text("This is a description of the level"),
             ],
         buttonTitle: "Start",
+        onBack: {},
         onStart: {}
     )
 }

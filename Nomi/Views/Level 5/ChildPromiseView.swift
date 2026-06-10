@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ChildPromiseView: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     @StateObject private var audio = AudioManager()
 
@@ -31,7 +32,7 @@ struct ChildPromiseView: View {
                     Spacer()
                     
                     TrustContractCard(
-                        mascotImage: "NomiHome",
+                        mascotImage: "Mascot",
                         title: "Child’s Promise",
                         dividerIcon: "💜",
                         promiseText: """
@@ -46,12 +47,27 @@ struct ChildPromiseView: View {
                     
                     Spacer()
                     
-                    WideButton(title: "I PROMISE! 👊", icon: nil) {
+                    WideButton(title: "I PROMISE!", icon: nil) {
                         onComplete()
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 44)
                 }
+
+                NomiBackButton(action: onBack)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.leading, 20)
+                    .padding(.top, 62)
+
+                AudioMuteButton(isMuted: audio.isMuted) {
+                    audio.toggleMute()
+                    if !audio.isMuted {
+                        audio.play(audioName: "ChildPromise")
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.trailing, 20)
+                .padding(.top, 62)
             }
             .onAppear {
                 audio.play(audioName: "ChildPromise")

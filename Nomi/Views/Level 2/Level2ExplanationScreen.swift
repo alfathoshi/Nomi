@@ -6,15 +6,15 @@
 //
 
 import SwiftUI
-import AVFoundation
 
 let screenSize = UIScreen.main.bounds.size
 
 struct Level2ExplanationScreen: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     @State private var navigateToFlipCard = false
-    @State private var audioPlayer: AVAudioPlayer?
+    @StateObject private var audio = AudioManager()
     var body: some View {
         let highlight = Text("\"The Doctor Words\"")
             .foregroundColor(.nomiPrimary)
@@ -22,7 +22,12 @@ struct Level2ExplanationScreen: View {
 
         Group {
             if navigateToFlipCard {
-                FlipCardScreen(onComplete: onComplete)
+                FlipCardScreen(
+                    onComplete: onComplete,
+                    onBack: {
+                        navigateToFlipCard = false
+                    }
+                )
             } else {
             ZStack {
                 Image(.storyBackground)
@@ -35,7 +40,8 @@ struct Level2ExplanationScreen: View {
                     .clipped()
                     .ignoresSafeArea()
                 
-                VStack(spacing: 24) {
+                VStack() {
+                    Spacer()
                     // Title
                     Text("Doctor's Words")
                         .font(.heading1(size: 36))
@@ -77,41 +83,34 @@ struct Level2ExplanationScreen: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 48)
                 }
+
+                NomiBackButton(action: onBack)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.leading, 20)
+                .padding(.top, 62)
+
+                AudioMuteButton(isMuted: audio.isMuted) {
+                    audio.toggleMute()
+                    if !audio.isMuted {
+                        playNarration()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.trailing, 20)
+                .padding(.top, 62)
             }
             .onAppear {
-                playNarration(named: "Level-2-Explanation", fileExtension: "mp3")
+                playNarration()
             }
             .onDisappear {
-                stopNarration()
+                audio.stop()
             }
             }
         }
     }
 
-    private func playNarration(named fileName: String, fileExtension: String) {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
-            print("Narration audio not found: \(fileName).\(fileExtension)")
-            return
-        }
-
-        print("Narration audio found: \(url.lastPathComponent)")
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play narration audio: \(error.localizedDescription)")
-        }
-    }
-
-    private func stopNarration() {
-        audioPlayer?.stop()
-        audioPlayer = nil
-        try? AVAudioSession.sharedInstance().setActive(false)
+    private func playNarration() {
+        audio.play(audioName: "Level-2-Explanation")
     }
 }
 

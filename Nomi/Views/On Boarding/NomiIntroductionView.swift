@@ -23,6 +23,7 @@ struct NomiIntroductionView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
+                Spacer()
                 greeting
                     .padding(.horizontal, 28)
                     .padding(.top, 34)
@@ -53,6 +54,16 @@ struct NomiIntroductionView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 44)
             .padding(.top, 24)
+
+            AudioMuteButton(isMuted: audio.isMuted) {
+                audio.toggleMute()
+                if !audio.isMuted {
+                    audio.play(audioName: "nomi intro")
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            .padding(.trailing, 20)
+            .padding(.top, 62)
         }
         
         .navigationBarBackButtonHidden(true)

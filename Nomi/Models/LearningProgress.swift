@@ -27,6 +27,12 @@ enum LearningProgress {
         UserDefaults.standard.set(completedLevel, forKey: completedLevelsKey)
     }
 
+    static func reset() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: completedLevelsKey)
+        defaults.removeObject(forKey: completionDatesKey)
+    }
+
     static var completionDates: [Int: Date] {
         guard
             let data = UserDefaults.standard.data(forKey: completionDatesKey),

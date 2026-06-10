@@ -9,13 +9,17 @@ import SwiftUI
 
 struct ParentZoneView: View {
     var onExit: () -> Void = {}
+    var onLogout: () -> Void = {}
 
     @State private var isAuthenticated = false
 
     var body: some View {
         Group {
             if isAuthenticated {
-                ParentDashboardView(onExit: onExit)
+                ParentDashboardView(
+                    onExit: onExit,
+                    onLogout: onLogout
+                )
             } else {
                 ParentPasscodeView {
                     isAuthenticated = true

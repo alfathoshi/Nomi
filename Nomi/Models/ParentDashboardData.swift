@@ -36,6 +36,10 @@ struct ParentDashboardData {
         completedLevels == totalLevels ? 1 : 0
     }
 
+    var totalCoins: Int {
+        completedLevels * 2
+    }
+
     static func make(
         completedLevels: Int,
         completionDates: [Int: Date] = LearningProgress.completionDates

@@ -13,6 +13,7 @@ let cardCornerRadius: CGFloat = 32
 
 struct FlipCardScreen: View {
     var onComplete: () -> Void = {}
+    var onBack: () -> Void = {}
 
     let cards: [FlipCard] = FlipCardData.cards
 
@@ -20,6 +21,7 @@ struct FlipCardScreen: View {
     @State private var showCompletionPopup = false
     @State private var showConfetti = false
     @State private var audioPlayTask: Task<Void, Never>?
+    @State private var currentAudioName: String?
     @StateObject private var audio = AudioManager()
     private var currentCard: FlipCard {
         cards[currentIndex]
@@ -37,18 +39,33 @@ struct FlipCardScreen: View {
                 .clipped()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack() {
+                
                 Text("Doctor's Words")
                     .font(.heading1(size: 36))
                     .foregroundColor(.nomiTextPrimary)
-                    .padding(.top, 100)
 
                 cardStack
-                    .padding(.top, 78)
+                    .padding(.top, 72)
+                    .padding(.bottom, 72)
 
-                Spacer()
-                Spacer()
+                
             }
+
+            NomiBackButton(action: onBack)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.leading, 20)
+                .padding(.top, 62)
+
+            AudioMuteButton(isMuted: audio.isMuted) {
+                audio.toggleMute()
+                if !audio.isMuted, let currentAudioName {
+                    playAudioAfterDelay(currentAudioName)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            .padding(.trailing, 20)
+            .padding(.top, 62)
 
             if showConfetti {
                 Color.black.opacity(0.25)
@@ -142,6 +159,7 @@ struct FlipCardScreen: View {
     }
 
     private func playAudioAfterDelay(_ audioName: String) {
+        currentAudioName = audioName
         audio.stop()
         audioPlayTask?.cancel()
 

@@ -36,8 +36,9 @@ struct RoadmapScreen: View {
                     level: selectedLevel,
                     onReturnHome: returnHome
                 )
-                    .navigationBarBackButtonHidden(true)
+                .toolbar(.hidden, for: .navigationBar)
             }
+            .toolbar(.hidden, for: .navigationBar)
             .onAppear {
                 lockToPortrait()
             }
@@ -70,12 +71,22 @@ struct RoadmapScreen: View {
                     }
                     .buttonStyle(.plain)
                     .tapSound()
-                    .disabled(state == .locked)
+                    .allowsHitTesting(state != .locked)
                     .position(
                         x: geo.size.width * node.x,
                         y: geo.size.height * node.y
                     )
                 }
+
+                NomiBackButton(action: returnHome)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .topLeading
+                    )
+                    .padding(.leading, 20)
+                    .padding(.top, 12)
+                    .zIndex(1)
             }
         }
     }
@@ -177,23 +188,37 @@ private struct LevelDestination: View {
     let level: Int
     let onReturnHome: () -> Void
 
-    @ViewBuilder
     var body: some View {
-        switch level {
-        case 1:
-            Level1LaunchView(onReturnHome: onReturnHome)
-                .environment(\.returnToRoadmap, dismiss.callAsFunction)
-        case 2:
-            Level2ExplanationScreen(onComplete: dismiss.callAsFunction)
-        case 3:
-            Level3ExplanationView(onComplete: dismiss.callAsFunction)
-        case 4:
-            Level4ExplanationView(onComplete: dismiss.callAsFunction)
-        case 5:
-            Level5ExplanationView(onComplete: onReturnHome)
-        default:
-            EmptyView()
+        Group {
+            switch level {
+            case 1:
+                Level1LaunchView(onReturnHome: onReturnHome)
+                    .environment(\.returnToRoadmap, dismiss.callAsFunction)
+            case 2:
+                Level2ExplanationScreen(
+                    onComplete: dismiss.callAsFunction,
+                    onBack: dismiss.callAsFunction
+                )
+            case 3:
+                Level3ExplanationView(
+                    onComplete: dismiss.callAsFunction,
+                    onBack: dismiss.callAsFunction
+                )
+            case 4:
+                Level4ExplanationView(
+                    onComplete: dismiss.callAsFunction,
+                    onBack: dismiss.callAsFunction
+                )
+            case 5:
+                Level5ExplanationView(
+                    onComplete: onReturnHome,
+                    onBack: dismiss.callAsFunction
+                )
+            default:
+                EmptyView()
+            }
         }
+        .ignoresSafeArea()
     }
 }
 
