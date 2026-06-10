@@ -12,40 +12,7 @@ let cardHeight: CGFloat = 390
 let cardCornerRadius: CGFloat = 32
 
 struct FlipCardScreen: View {
-    let cards: [FlipCard] = [
-        FlipCard(
-            frontLabel: "Boy's Private\nPart",
-            frontEmoji: "🩲",
-            frontAudioName: "BoysPart",
-            realNames: ["Penis"],
-            backAudioName: "Penis",
-            alternativeName: "Pee-pee"
-        ),
-        FlipCard(
-            frontLabel: "Girl's Private\nPart",
-            frontEmoji: "👙",
-            frontAudioName: "GirlsPart",
-            realNames: ["Vagina"],
-            backAudioName: "Vagina",
-            alternativeName: "Miss V"
-        ),
-        FlipCard(
-            frontLabel: "Upper Private\nPart",
-            frontEmoji: "👕",
-            frontAudioName: "UpperPart",
-            realNames: ["Chest","or","Nipple"],
-            backAudioName: "Chest",
-            alternativeName: nil
-        ),
-        FlipCard(
-            frontLabel: "Back Private\nPart",
-            frontEmoji: "🍑",
-            frontAudioName: "BackPart",
-            realNames: ["Buttocks", "or" ,"Bottom"],
-            backAudioName: "Buttocks",
-            alternativeName: "Bum-bum"
-        ),
-    ]
+    let cards: [FlipCard] = FlipCardData.cards
 
     @State private var currentIndex = 0
     @State private var showCompletionPopup = false
@@ -260,8 +227,8 @@ struct FlippableCardView: View {
                 VStack(spacing: 24) {
                     Spacer()
 
-                    Text(card.frontEmoji)
-                        .font(.system(size: 100))
+                    Image(card.frontImage)
+                        .fixedSize()
 
                     Text(card.frontLabel)
                         .font(.display())
