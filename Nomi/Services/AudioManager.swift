@@ -22,7 +22,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         configureAudioSession()
     }
 
-    func play(audioName: String, fileExtension: String = "mp3") {
+    func play(audioName: String, fileExtension: String = "mp3", volume: Float = 1.0) {
         stop()
 
         guard !isMuted else { return }
@@ -32,7 +32,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             return
         }
 
-        play(url: url)
+        play(url: url, volume: volume)
     }
 
     func playSequence(audioNames: [String], fileExtension: String = "mp3") {
@@ -51,10 +51,11 @@ class AudioManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         playNextQueuedAudio()
     }
 
-    private func play(url: URL) {
+    private func play(url: URL, volume: Float = 1.0) {
         do {
             player = try AVAudioPlayer(contentsOf: url)
             player?.delegate = self
+            player?.volume = volume
             player?.prepareToPlay()
             player?.play()
             isPlaying = true

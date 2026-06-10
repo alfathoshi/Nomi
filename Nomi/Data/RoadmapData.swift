@@ -6,43 +6,49 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct RoadmapData {
     static let nodes: [RoadmapNodeData] = [
         RoadmapNodeData(
             x: 0.78,
-            y: 0.20,
+            y: 0.15,
             state: .completed,
             levelLabel: LevelLabelInfo(level: 5, title: "Final Quiz", position: .above),
-            icon: "Level1Node"
+            icon: .level5
         ),
         RoadmapNodeData(
-            x: 0.40,
+            x: 0.35,
             y: 0.35,
             state: .completed,
             levelLabel: LevelLabelInfo(level: 4, title: "What to do if unsafe", position: .above),
-            icon: "Level1Node"
+            icon: .level4
         ),
         RoadmapNodeData(
             x: 0.70,
             y: 0.52,
             state: .completed,
             levelLabel: LevelLabelInfo(level: 3, title: "Safe Touch", position: .above),
-            icon: "Level1Node"
+            icon: .level3
         ),
         RoadmapNodeData(
             x: 0.78,
             y: 0.75,
             state: .current,
             levelLabel: LevelLabelInfo(level: 2, title: "Private Parts", position: .above),
-            icon: "UnlockedNode"
+            icon: .level2
         ),
         RoadmapNodeData(
-            x: 0.40,
-            y: 0.88,
+            x: 0.35,
+            y: 0.90,
             state: .completed,
             levelLabel: LevelLabelInfo(level: 1, title: "My Body", position: .below),
-            icon: "Level1Node"
+            icon: .level1
         ),
     ]
 }
+
+#Preview {
+    RoadmapScreen()
+}
+

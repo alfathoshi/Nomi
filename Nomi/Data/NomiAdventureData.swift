@@ -19,7 +19,7 @@ struct NomiAdventureData {
             ),
 
             StoryPage(
-                image: .landscape1,
+                image: .landscape2,
                 content: Text("Her \(Text("body").foregroundColor(.nomiPrimary)) belonged \(Text("entirely").foregroundColor(.nomiPrimary)) to her, and \(Text("nobody touched").foregroundColor(.nomiPrimary)) her special spikes \(Text("without asking.").foregroundColor(.nomiPrimary))"),
                 audioName: "page_2"
             ),
