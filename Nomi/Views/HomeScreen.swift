@@ -25,7 +25,7 @@ struct HomeScreen: View {
                 isLocked: false
             ),
             TopicData(number: 2, title: "Personal Hygiene", characterImage: "HomeBoy", isLocked: true),
-            TopicData(number: 3, title: "Consent & Saying Yes or No", characterImage: "HomeGirl", isLocked: true),
+            TopicData(number: 3, title: "Saying \nYes or No", characterImage: "HomeGirl", isLocked: true),
             TopicData(number: 4, title: "Trusted Adults", characterImage: "HomeBoy", isLocked: true),
         ]
     }
@@ -45,7 +45,7 @@ struct HomeScreen: View {
                     .scaledToFill()
                     .ignoresSafeArea()
 
-                VStack(spacing: 0) {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         //greeting bubble + avatar
                         HStack(alignment: .top, spacing: 8) {
@@ -81,26 +81,23 @@ struct HomeScreen: View {
                             .zIndex(0)
 
                         //cardlist
-                        ScrollView(showsIndicators: false) {
-                            VStack(spacing: 12) {
-                                ForEach(topics) { topic in
-                                    TopicCard(
-                                        number: topic.number,
-                                        title: topic.title,
-                                        characterImage: topic.characterImage,
-                                        currentStep: topic.currentStep,
-                                        totalSteps: topic.totalSteps,
-                                        isLocked: topic.isLocked
-                                    ) {
-                                        prepareLearningScreen()
-                                    }
+                        VStack(spacing: 12) {
+                            ForEach(topics) { topic in
+                                TopicCard(
+                                    number: topic.number,
+                                    title: topic.title,
+                                    characterImage: topic.characterImage,
+                                    currentStep: topic.currentStep,
+                                    totalSteps: topic.totalSteps,
+                                    isLocked: topic.isLocked
+                                ) {
+                                    prepareLearningScreen()
                                 }
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 30)
                         }
+                        .padding(.horizontal, 46)
                         .padding(.top, -90)
-                        .padding(.horizontal, 30)
+                        .padding(.bottom, 30)
                     }
                 }
                 if showStoryTransition {

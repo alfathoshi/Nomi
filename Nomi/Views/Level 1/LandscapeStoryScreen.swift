@@ -35,6 +35,7 @@ struct LandscapeStoryScreen: View {
     @State private var showContents: Bool = false
     @State private var textSize: TextSize = .medium
     @State private var multiJumpTarget: Int? = nil
+    @State private var audioPlayTask: Task<Void, Never>? = nil
     @StateObject private var audio = AudioManager()
 
     var onHome: () -> Void = {}
@@ -160,9 +161,7 @@ struct LandscapeStoryScreen: View {
             OrientationManager.shared.lock(to: .landscape)
             #endif
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                playCurrentPageAudio()
-            }
+            playCurrentPageAudio(afterSeconds: 1.0)
         }
         .onDisappear {
             #if os(iOS)
@@ -175,11 +174,14 @@ struct LandscapeStoryScreen: View {
             if let target = multiJumpTarget {
                 if newValue == target {
                     multiJumpTarget = nil
-                    playCurrentPageAudio()
+                    playCurrentPageAudio(afterSeconds: 1.3)
+                } else {
+                    audio.stop()
+                    audioPlayTask?.cancel()
                 }
                 return
             }
-            playCurrentPageAudio()
+            playCurrentPageAudio(afterSeconds: 1.3)
         }
         .navigationDestination(isPresented: $navigateToWordScreen) {
             Level2ExplanationScreen()
@@ -431,10 +433,18 @@ struct LandscapeStoryScreen: View {
         }
     }
 
-    private func playCurrentPageAudio() {
+    private func playCurrentPageAudio(afterSeconds delay: TimeInterval = 0) {
         audio.stop()
-        if let name = currentPage.audioName {
-            audio.play(audioName: name)
+        audioPlayTask?.cancel()
+
+        audioPlayTask = Task { @MainActor in
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled else { return }
+            }
+            if let name = currentPage.audioName {
+                audio.play(audioName: name, volume: 5)
+            }
         }
     }
 

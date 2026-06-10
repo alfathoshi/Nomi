@@ -60,7 +60,7 @@ struct ParentPromiseView: View {
                     .navigationBarBackButtonHidden(true)
             }
             .onAppear {
-                audio.play(audioName: "ParentPromise")
+                audio.play(audioName: "ParentPromise", volume: 6)
             }
             .onDisappear {
                 audio.stop()

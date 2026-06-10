@@ -43,5 +43,5 @@ struct ScenarioCard: View {
 }
 
 #Preview {
-    ScenarioCard(image: .story1, text: "Test")
+    ScenarioCard(image: .scenario1, text: "Test")
 }

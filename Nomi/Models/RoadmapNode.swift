@@ -29,5 +29,5 @@ struct RoadmapNodeData {
     let y: Double
     let state: NodeState
     var levelLabel: LevelLabelInfo? = nil
-    var icon: String = "Level1Node"
+    var icon: ImageResource
 }
