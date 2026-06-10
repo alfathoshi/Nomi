@@ -9,15 +9,17 @@ import SwiftUI
 
 struct AvatarButton: View {
     let avatar: String
+    let padding: Double
     @Binding var selectedAvatar: String?
 
     var body: some View {
         Button {
             selectedAvatar = avatar
         } label: {
-            Text(avatar)
-                .font(.display())
-                .foregroundColor(selectedAvatar == avatar ? .nomiTextOnDark : .nomiTextPrimary)
+            Image(avatar)
+                .resizable()
+                .scaledToFit()
+                .padding(padding)
                 .frame(width: 72, height: 72)
                 .background(
                     RoundedRectangle(cornerRadius: 21)

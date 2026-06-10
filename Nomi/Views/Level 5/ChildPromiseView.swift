@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct ChildPromiseView: View {
-    @State private var navigateToParentPromise = false
+    var onComplete: () -> Void = {}
+
     @StateObject private var audio = AudioManager()
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 Image(.storyBackground)
                     .resizable()
                     .scaledToFill()
@@ -47,15 +47,11 @@ struct ChildPromiseView: View {
                     Spacer()
                     
                     WideButton(title: "I PROMISE! 👊", icon: nil) {
-                        navigateToParentPromise.toggle()
+                        onComplete()
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 44)
                 }
-            }
-            .navigationDestination(isPresented: $navigateToParentPromise) {
-                ParentPromiseView()
-                    .navigationBarBackButtonHidden(true)
             }
             .onAppear {
                 audio.play(audioName: "ChildPromise")
@@ -63,7 +59,6 @@ struct ChildPromiseView: View {
             .onDisappear {
                 audio.stop()
             }
-        }
     }
 }
 

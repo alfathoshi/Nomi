@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct CongratsView: View {
+    var onComplete: () -> Void = {}
+
     let screenSize = UIScreen.main.bounds.size
-    @State private var navigateToHome = false
+
     var body: some View {
         ZStack {
                 Image(.storyBackground)
@@ -50,7 +52,7 @@ struct CongratsView: View {
                             EarnedItem(
                                 emoji: "🔥",
                                 backgroundColor: Color.orange.opacity(0.18),
-                                title: "3-Day Learning Streak",
+                                title: "Learning Streak",
                                 subtitle: "Amazing Consistency!"
                             )
 
@@ -60,7 +62,7 @@ struct CongratsView: View {
                             EarnedItem(
                                 emoji: "✋",
                                 backgroundColor: Color.nomiPrimary.opacity(0.18),
-                                title: "Learned: Body Parts",
+                                title: "Learned: My Body",
                                 subtitle: "You’re Learning So Much!"
                             )
                         }
@@ -81,17 +83,13 @@ struct CongratsView: View {
                     
                     Spacer()
                     
-                    WideButton(title: "Back Home", icon: "arrow.right") {
-                        navigateToHome = true
+                    WideButton(title: "Back to Home") {
+                        onComplete()
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 56)
                 .padding(.bottom, 44)
-                .navigationDestination(isPresented: $navigateToHome) {
-                    HomeScreen()
-                        .navigationBarBackButtonHidden(true)
-                }
         }
     }
 }

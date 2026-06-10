@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum NodeState {
+enum NodeState: Equatable {
     case completed
     case current
     case locked
@@ -27,7 +27,6 @@ struct LevelLabelInfo {
 struct RoadmapNodeData {
     let x: Double
     let y: Double
-    let state: NodeState
     var levelLabel: LevelLabelInfo? = nil
     var icon: ImageResource
 }

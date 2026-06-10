@@ -24,17 +24,20 @@ final class ParentZoneViewModel {
     private var pendingPin = ""
     private let pinStore: ParentPinStore
 
-    init(pinStore: ParentPinStore = ParentPinStore()) {
+    init(
+        initialMode: ParentPinMode? = nil,
+        pinStore: ParentPinStore = ParentPinStore()
+    ) {
         self.pinStore = pinStore
-        mode = pinStore.savedPin == nil ? .create : .unlock
+        mode = initialMode ?? (pinStore.savedPin == nil ? .create : .unlock)
     }
 
     var title: String {
         switch mode {
         case .create:
-            return "Set Up Parent PIN"
+            return "Set Up a Parent Passcode"
         case .confirm:
-            return "Confirm Parent PIN"
+            return "Confirm Parent Passcode"
         case .unlock:
             return "Parent Zone"
         }
@@ -43,11 +46,11 @@ final class ParentZoneViewModel {
     var instruction: String {
         switch mode {
         case .create:
-            return "Create a 4-digit PIN to protect the Parent Zone."
+            return "Parents, create a 4-digit passcode to keep the Parent Zone private and secure."
         case .confirm:
-            return "Enter the same PIN again to confirm it."
+            return "Enter the same 4-digit passcode again to make sure it’s correct."
         case .unlock:
-            return "This area is for grown-ups only.\nEnter your PIN to continue."
+            return "This area is for grown-ups only.\nEnter your parent passcode to continue."
         }
     }
 
@@ -80,13 +83,13 @@ final class ParentZoneViewModel {
                 enteredPin = ""
                 pendingPin = ""
                 mode = .create
-                message = "PINs did not match. Please create your PIN again."
+                message = "Passcodes did not match. Please create your passcode again."
                 return
             }
 
             guard pinStore.save(pin: enteredPin) else {
                 enteredPin = ""
-                message = "Could not save the PIN. Please try again."
+                message = "Could not save the passcode. Please try again."
                 return
             }
 
@@ -99,7 +102,7 @@ final class ParentZoneViewModel {
                 isAuthenticated = true
                 message = nil
             } else {
-                message = "Incorrect PIN. Please try again."
+                message = "Incorrect passcode. Please try again."
             }
             enteredPin = ""
         }

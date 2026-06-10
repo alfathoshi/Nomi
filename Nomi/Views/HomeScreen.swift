@@ -13,6 +13,7 @@ struct HomeScreen: View {
     @AppStorage(LearningProgress.completedLevelsKey)
     private var completedLevels = 0
     var onOpenParent: () -> Void = {}
+    var onOpenRoadmap: () -> Void = {}
 
     private var topics: [TopicData] {
         [
@@ -32,10 +33,14 @@ struct HomeScreen: View {
     private var profile: ChildProfile? {
         profiles.first
     }
-    @State private var navigateToLearningScreen = false
+
+    private var learningPrompt: String {
+        completedLevels > 0
+            ? "Let’s pick up from where we left"
+            : "What do you want to learn?"
+    }
+
     @State private var showIntro = false
-    @State private var showStoryTransition = false
-    @State private var nextLevel = 1
     let screenSize = UIScreen.main.bounds.size
     var body: some View {
         ZStack {
@@ -55,12 +60,18 @@ struct HomeScreen: View {
                                 onOpenParent()
                             } label: {
                                 if let avatar = profile?.avatar {
-                                    Text(avatar)
+                                    Image(avatar)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(8)
                                         .frame(width: 48, height: 48)
                                         .background(Circle().fill(.white))
                                         .clipShape(Circle())
                                 } else {
-                                    Image(systemName: "person.fill")
+                                    Image(.pip)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(4)
                                         .frame(width: 48, height: 48)
                                         .background(Circle().fill(.white))
                                         .clipShape(Circle())
@@ -91,7 +102,7 @@ struct HomeScreen: View {
                                     totalSteps: topic.totalSteps,
                                     isLocked: topic.isLocked
                                 ) {
-                                    prepareLearningScreen()
+                                    openTopic()
                                 }
                             }
                         }
@@ -100,36 +111,8 @@ struct HomeScreen: View {
                         .padding(.bottom, 30)
                     }
                 }
-                if showStoryTransition {
-                    GeometryReader { geo in
-                        ZStack {
-                            Image(.storyBackground)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: geo.size.width, height: geo.size.height)
-                                .clipped()
-
-                            VStack(spacing: 20) {
-                                ProgressView()
-                                    .scaleEffect(1.8)
-                                    .tint(.white)
-
-                                Text("Preparing your story...")
-                                    .font(.heading3())
-                                    .foregroundColor(.nomiTextPrimary)
-                            }
-                        }
-                        .frame(width: geo.size.width, height: geo.size.height)
-                    }
-                    .ignoresSafeArea()
-                    .zIndex(20)
-                }
-
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationDestination(isPresented: $navigateToLearningScreen) {
-            nextLearningScreen
-        }
         .fullScreenCover(isPresented: $showIntro) {
             NomiIntroductionView(
                 childName: profile?.name ?? "Friend",
@@ -138,41 +121,9 @@ struct HomeScreen: View {
         }
         .navigationBarBackButtonHidden(true)
     }
-    
-    private func prepareLearningScreen() {
-        nextLevel = min(max(completedLevels + 1, 1), LearningProgress.totalLevels + 1)
 
-        guard nextLevel == 1 else {
-            navigateToLearningScreen = true
-            return
-        }
-
-        showStoryTransition = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            navigateToLearningScreen = true
-            showStoryTransition = false
-        }
-    }
-
-    @ViewBuilder
-    private var nextLearningScreen: some View {
-        Group {
-            switch nextLevel {
-            case 1:
-                LandscapeStoryScreen()
-            case 2:
-                Level2ExplanationScreen()
-            case 3:
-                Level3ExplanationView()
-            case 4:
-                Level4ExplanationView()
-            case 5:
-                Level5ExplanationView()
-            default:
-                CongratsView()
-            }
-        }
-        .navigationBarBackButtonHidden(true)
+    private func openTopic() {
+        onOpenRoadmap()
     }
 
     // MARK: - Greeting bubble
@@ -183,15 +134,17 @@ struct HomeScreen: View {
                 .shadow(radius: 5)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text("Morning, \(profile?.name ?? "Friend")")
-                    .font(.heading2())
-                    .foregroundColor(.nomiTextPrimary)
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    Text("\(greeting(for: context.date)), \(profile?.name ?? "Friend")")
+                        .font(.heading2())
+                        .foregroundColor(.nomiTextPrimary)
+                }
                 
-                Text("What do you want to learn?")
+                Text(learningPrompt)
                     .font(.bodyLarge())
                     .foregroundColor(.nomiTextPrimary)
                 
-                Text("Tap me to know me")
+                Text("Get to know me")
                     .font(.bodyMedium(weight: .bold))
                     .foregroundColor(.nomiPrimary)
                     .padding(.top, 4)
@@ -210,15 +163,17 @@ struct HomeScreen: View {
                 .shadow(radius: 5)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Morning, \(profile?.name ?? "Friend")")
-                    .font(.heading2())
-                    .foregroundColor(.nomiTextPrimary)
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    Text("\(greeting(for: context.date)), \(profile?.name ?? "Friend")")
+                        .font(.heading3())
+                        .foregroundColor(.nomiTextPrimary)
+                }
                 
-                Text("What do you want to learn?")
+                Text(learningPrompt)
                     .font(.bodyLarge())
                     .foregroundColor(.nomiTextPrimary)
 
-                Text("Tap me to know me")
+                Text("Get to know me")
                     .font(.bodyMedium(weight: .bold))
                     .foregroundColor(.nomiPrimary)
                     .padding(.top, 4)
@@ -227,11 +182,22 @@ struct HomeScreen: View {
             .padding(.top, 10)
             .padding(.bottom, 30)
         }
-        .frame(width: 305, height: 128)
+        .frame(width: 305, height: completedLevels > 0 ? 148 : 128)
         .padding(.bottom, 30)
         .contentShape(Rectangle())
         .onTapGesture {
             showIntro = true
+        }
+    }
+
+    private func greeting(for date: Date) -> String {
+        switch Calendar.current.component(.hour, from: date) {
+        case 5..<12:
+            return "Good Morning"
+        case 12..<17:
+            return "Good Afternoon"
+        default:
+            return "Good Evening"
         }
     }
 }

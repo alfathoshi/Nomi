@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct PinkyPromiseView: View {
-    @State private var navigateToCongratsScreen: Bool = false
+    var onComplete: () -> Void = {}
+
     @State private var showConfetti = false
     @StateObject private var audio = AudioManager()
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 Image(.storyBackground)
                     .resizable()
                     .scaledToFill()
@@ -29,16 +29,10 @@ struct PinkyPromiseView: View {
                         .multilineTextAlignment(.center)
                         .padding(.top, 90)
                     
-                    Text("PINKY PROMISE")
-                        .font(.heading3())
-                        .foregroundColor(.nomiPrimarySoft)
-                        .multilineTextAlignment(.center)
-                    
-                    
                     Spacer()
                     
                     VStack(spacing: 0) {
-                        Image("NomiHome")
+                        Image(.level5)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 110, height: 110)
@@ -55,8 +49,8 @@ struct PinkyPromiseView: View {
                         
                         
                         Text("""
-                            Listeing, helping,
-                            keepig each other safe
+                            Listening, helping,
+                            keeping each other safe
                             """)
                             .font(.heading3())
                             .foregroundColor(.nomiTextPrimary)
@@ -77,7 +71,7 @@ struct PinkyPromiseView: View {
                     
                     Spacer()
                     
-                    TwoFingerHoldArea(duration: 5) {
+                    TwoFingerHoldArea(duration: 3) {
                         completePinkyPromise()
                     }
                     Spacer()
@@ -93,17 +87,12 @@ struct PinkyPromiseView: View {
                         .allowsHitTesting(false)
                 }
             }
-            .navigationDestination(isPresented: $navigateToCongratsScreen) {
-                CongratsView()
-                    .navigationBarBackButtonHidden(true)
-            }
             .onAppear {
                 audio.play(audioName: "PinkyPromise")
             }
             .onDisappear {
                 audio.stop()
             }
-        }
     }
 
     private func completePinkyPromise() {
@@ -113,7 +102,7 @@ struct PinkyPromiseView: View {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
             showConfetti = false
-            navigateToCongratsScreen = true
+            onComplete()
         }
     }
 }

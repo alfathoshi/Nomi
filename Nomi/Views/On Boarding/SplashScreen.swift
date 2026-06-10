@@ -37,7 +37,6 @@ struct SplashScreen: View {
                 Text("NOMI")
                     .font(.heading1(weight: .black, size: 42))
                     .foregroundStyle(Color.nomiSurface)
-
                 Text("Get to know me")
                     .font(.bodyLarge())
                     .foregroundStyle(Color.nomiSurface)
@@ -55,7 +54,6 @@ struct SplashScreen: View {
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 44)
         }
         .task(id: hasProfile) {
             guard hasProfile else { return }

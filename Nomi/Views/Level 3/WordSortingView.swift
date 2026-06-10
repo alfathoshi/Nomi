@@ -10,6 +10,7 @@ import SwiftUI
 import AVFoundation
 
 struct WordSortingView: View {
+    var onComplete: () -> Void = {}
     
     @State private var words = SortingWordData.words
     @State private var showCelebration = false
@@ -47,9 +48,6 @@ struct WordSortingView: View {
         }
     }
 
-    @State private var navigateToScenarioQuiz = false
-
-    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -87,8 +85,6 @@ struct WordSortingView: View {
                         checkSortingResult()
                     }
                     .disabled(isFinishDisabled)
-                    .saturation(isFinishDisabled ? 0.1 : 1)
-                    .opacity(isFinishDisabled ? 0.7 : 1)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 84)
@@ -133,13 +129,13 @@ struct WordSortingView: View {
                     CongratsPopUp(
                         title: "Level 3 Complete",
                         mascotImage: "NomiDoctor",
-                        buttonTitle: "Next Level",
+                        buttonTitle: "Next",
                         onDismiss: {
                             showCongratsPopup = false
                         },
                         onNext: {
                             showCongratsPopup = false
-                            navigateToScenarioQuiz = true
+                            onComplete()
                         }
                     )
                     .zIndex(100)
@@ -150,10 +146,6 @@ struct WordSortingView: View {
                 guard !didPlaceInitialWords, newFrame.width > 0, newFrame.height > 0 else { return }
                 placeInitialWordsInWordBank()
                 didPlaceInitialWords = true
-            }
-            .navigationDestination(isPresented: $navigateToScenarioQuiz) {
-                Level4ExplanationView()
-                    .navigationBarBackButtonHidden(true)
             }
         }
     }
@@ -431,18 +423,32 @@ struct DropContainer: View {
     let title: String
     @Binding var frame: CGRect
     let showWrongOverlay: Bool
-    
+
+    private let cornerRadius: CGFloat = 24
+
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+    }
+
+    private var borderColor: Color {
+        title == "Private\nParts" ? .nomiSuccess : .nomiDanger
+    }
+
     var body: some View {
         VStack(alignment: .center, spacing: 12) {
             Text(title)
-                .font(.heading2(weight:.extraBold))
+                .font(.heading2(weight: .extraBold))
                 .foregroundStyle(Color.nomiTextPrimary)
                 .multilineTextAlignment(.center)
-            
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color.nomiSurfaceTint)
+
+            shape
+                .fill(Color.nomiSurfaceTint.opacity(0.15))
+                .glassEffect(
+                    .clear.tint(.nomiSurfaceTint),
+                    in: shape
+                )
                 .frame(maxWidth: .infinity)
-            
+                .clipShape(shape)
                 .background(
                     GeometryReader { geo in
                         Color.clear
@@ -454,23 +460,15 @@ struct DropContainer: View {
                             }
                     }
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(
-                            title == "Private\nParts"
-                            ? Color.nomiSuccess.opacity(0.5)
-                            : Color.nomiDanger.opacity(0.5),
-                            lineWidth: 2
-                        )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .fill(Color.red.opacity(showWrongOverlay ? 0.18 : 0))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(Color.red.opacity(showWrongOverlay ? 0.9 : 0), lineWidth: 3)
-                )
+                .overlay {
+                    shape.stroke(borderColor.opacity(0.3), lineWidth: 2)
+                }
+                .overlay {
+                    shape.fill(Color.red.opacity(showWrongOverlay ? 0.18 : 0))
+                }
+                .overlay {
+                    shape.stroke(Color.red.opacity(showWrongOverlay ? 0.9 : 0), lineWidth: 3)
+                }
                 .animation(.easeInOut(duration: 0.12), value: showWrongOverlay)
         }
     }
@@ -483,11 +481,25 @@ struct DropContainer: View {
 
 struct WordBankDropContainer: View {
     @Binding var frame: CGRect
-    
+
+    private let cornerRadius: CGFloat = 24
+
+    private var shape: RoundedRectangle {
+        RoundedRectangle(
+            cornerRadius: cornerRadius,
+            style: .continuous
+        )
+    }
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 24)
-            .fill(Color.nomiSurfaceTint)
+        shape
+            .fill(Color.nomiSurfaceTint.opacity(0.15))
+            .glassEffect(
+                .clear.tint(.nomiSurfaceTint),
+                in: shape
+            )
             .frame(maxWidth: .infinity)
+            .clipShape(shape)
             .background(
                 GeometryReader { geo in
                     Color.clear
@@ -499,12 +511,11 @@ struct WordBankDropContainer: View {
                         }
                 }
             )
-            .overlay(
-                RoundedRectangle(cornerRadius: 24)
-                    .stroke(
-                        Color.nomiPrimary.opacity(0.5),
-                        lineWidth: 2
-                    )
-            )
+            .overlay {
+                shape.stroke(
+                    Color.nomiPrimary.opacity(0.3),
+                    lineWidth: 2
+                )
+            }
     }
 }

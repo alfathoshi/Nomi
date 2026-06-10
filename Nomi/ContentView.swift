@@ -8,11 +8,6 @@
 import SwiftUI
 import SwiftData
 
-enum Route: Hashable {
-    case parentPasscode
-    case parentDashboard
-}
-
 struct ContentView: View {
     @State private var launchPhase: LaunchPhase = .splash
     @State private var isSplashVisible = true
@@ -75,21 +70,27 @@ private enum LaunchPhase: Equatable {
 }
 
 private struct MainNavigationView: View {
-    @State private var path = NavigationPath()
+    @State private var showRoadmap = false
+    @State private var showParentZone = false
 
     var body: some View {
-        NavigationStack(path: $path) {
-            HomeScreen {
-                path.append(Route.parentPasscode)
+        NavigationStack {
+            HomeScreen(
+                onOpenParent: {
+                    showParentZone = true
+                },
+                onOpenRoadmap: {
+                    showRoadmap = true
+                }
+            )
+            .navigationDestination(isPresented: $showRoadmap) {
+                RoadmapScreen {
+                    showRoadmap = false
+                }
             }
-            .navigationDestination(for: Route.self) { route in
-                switch route {
-                case .parentPasscode:
-                    ParentZoneView(path: $path)
-                case .parentDashboard:
-                    ParentDashboardView {
-                        path = NavigationPath()
-                    }
+            .navigationDestination(isPresented: $showParentZone) {
+                ParentZoneView {
+                    showParentZone = false
                 }
             }
         }

@@ -64,7 +64,7 @@ struct OnBoardingView: View {
                     FeatureCard(
                         icon: "star.fill",
                         title: "Earn coins & badges",
-                        subtitle: "Your child gets rewarded for every level completed",
+                        subtitle: "Your child gets rewarded for each level",
                         color: .surfaceTint,
                         iconColor: .accent,
                     )

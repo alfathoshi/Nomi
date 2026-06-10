@@ -11,6 +11,8 @@ import AVFoundation
 let screenSize = UIScreen.main.bounds.size
 
 struct Level2ExplanationScreen: View {
+    var onComplete: () -> Void = {}
+
     @State private var navigateToFlipCard = false
     @State private var audioPlayer: AVAudioPlayer?
     var body: some View {
@@ -18,7 +20,10 @@ struct Level2ExplanationScreen: View {
             .foregroundColor(.nomiPrimary)
             .font(.heading3())
 
-        NavigationStack {
+        Group {
+            if navigateToFlipCard {
+                FlipCardScreen(onComplete: onComplete)
+            } else {
             ZStack {
                 Image(.storyBackground)
                     .resizable()
@@ -79,12 +84,10 @@ struct Level2ExplanationScreen: View {
             .onDisappear {
                 stopNarration()
             }
-            .navigationDestination(isPresented: $navigateToFlipCard) {
-                FlipCardScreen()
-                    .navigationBarBackButtonHidden(true)
             }
         }
     }
+
     private func playNarration(named fileName: String, fileExtension: String) {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
             print("Narration audio not found: \(fileName).\(fileExtension)")

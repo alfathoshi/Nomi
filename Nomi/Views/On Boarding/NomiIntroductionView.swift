@@ -10,53 +10,51 @@ import SwiftUI
 struct NomiIntroductionView: View {
     let childName: String
     var onContinue: () -> Void = {}
-
+    
     @StateObject private var audio = AudioManager()
-
+    
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                Image(.storyBackground)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .clipped()
-                    .ignoresSafeArea()
-
-                Color.white.opacity(0.12)
-                    .ignoresSafeArea()
-
-                VStack(spacing: 0) {
-                    greeting
-                        .padding(.horizontal, 28)
-                        .padding(.top, 34)
-
-                    Spacer(minLength: 12)
-
-                    LottieWrapper(fileName: "NomiIdleFloat", loop: true)
-                        .frame(
-                            width: min(geometry.size.width * 0.9, 380),
-                            height: min(geometry.size.width * 0.9, 380)
-                        )
-                        .scaleEffect(1.3)
-                        .shadow(color: .nomiPrimary.opacity(0.16), radius: 18, y: 10)
-
-                    Spacer(minLength: 12)
-
-                    reassurance
-                        .padding(.horizontal, 32)
-                        .padding(.bottom, 28)
-
-                    WideButton(
-                        title: "Let’s Learn Together",
-                        icon: "book.fill",
-                        action: onContinue
+        ZStack {
+            Image(.storyBackground)
+                .resizable()
+                .scaledToFill()
+                .frame(width: screenSize.width, height: screenSize.height)
+                .clipped()
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                greeting
+                    .padding(.horizontal, 28)
+                    .padding(.top, 34)
+                
+                Spacer(minLength: 12)
+                
+                LottieWrapper(fileName: "NomiIdleFloat", loop: true)
+                    .frame(
+                        width: min(screenSize.width * 0.9, 380),
+                        height: min(screenSize.height * 0.9, 380)
                     )
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 18)
-                }
+                    .scaleEffect(1.3)
+                    .shadow(color: .nomiPrimary.opacity(0.16), radius: 18, y: 10)
+                
+                Spacer()
+                
+                reassurance
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 28)
+                
+                WideButton(
+                    title: "Let’s Learn Together",
+                    icon: "book.fill",
+                    action: onContinue
+                )
+                
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 44)
+            .padding(.top, 24)
         }
+        
         .navigationBarBackButtonHidden(true)
         .onAppear {
             audio.play(audioName: "nomi intro")
@@ -65,7 +63,7 @@ struct NomiIntroductionView: View {
             audio.stop()
         }
     }
-
+    
     private var greeting: some View {
         VStack(spacing: 6) {
             Text(
@@ -74,7 +72,7 @@ struct NomiIntroductionView: View {
             .font(.heading2(size: 20))
             .foregroundColor(.nomiTextPrimary)
             .multilineTextAlignment(.center)
-
+            
             Text("I can be a little shy sometimes, maybe\nyou feel that way too?")
                 .font(.bodyLarge())
                 .foregroundColor(.nomiTextSecondary)
@@ -82,7 +80,7 @@ struct NomiIntroductionView: View {
                 .lineSpacing(3)
         }
     }
-
+    
     private var reassurance: some View {
         Text(
             """
@@ -95,7 +93,7 @@ struct NomiIntroductionView: View {
         .multilineTextAlignment(.center)
         .lineSpacing(3)
     }
-
+    
     private var displayName: String {
         let trimmedName = childName.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedName.isEmpty ? "Friend" : trimmedName

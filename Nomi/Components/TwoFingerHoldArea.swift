@@ -12,6 +12,7 @@ struct TwoFingerHoldArea: View {
 
     @State private var progress: CGFloat = 0
     @State private var holdTask: Task<Void, Never>?
+    @State private var hapticTask: Task<Void, Never>?
     @State private var hasCompleted = false
     @State private var isPulsing = false
     @State private var isHolding = false
@@ -81,7 +82,7 @@ struct TwoFingerHoldArea: View {
                 .frame(height: 10)
                 .padding(.horizontal, 28)
 
-                Text(progress > 0 ? "Hold for 5 seconds" : "Touch anywhere in this area")
+                Text(progress > 0 ? "Hold for 3 seconds" : "Touch anywhere in this area")
                     .font(.bodySmall())
                     .foregroundColor(.nomiTextSecondary)
                     .transaction { transaction in
@@ -139,6 +140,7 @@ struct TwoFingerHoldArea: View {
                 Image(systemName: "hand.tap.fill")
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(progress > 0 ? .white : color)
+                    .scaleEffect(x: label == "Kid" ? -1 : 1, y: 1)
             }
 
             Text(label)
@@ -160,6 +162,9 @@ struct TwoFingerHoldArea: View {
     private func startHold() {
         guard holdTask == nil else { return }
 
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        startHapticPulse()
+
         withAnimation(.easeInOut(duration: 0.35)) {
             isHolding = true
         }
@@ -172,18 +177,43 @@ struct TwoFingerHoldArea: View {
             guard !Task.isCancelled else { return }
 
             await MainActor.run {
+                hapticTask?.cancel()
+                hapticTask = nil
                 hasCompleted = true
                 holdTask = nil
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 onComplete()
             }
         }
     }
 
+    private func startHapticPulse() {
+        hapticTask?.cancel()
+        hapticTask = Task { @MainActor in
+            let generator = UIImpactFeedbackGenerator(style: .soft)
+            generator.prepare()
+
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(350))
+                guard !Task.isCancelled else { return }
+
+                generator.impactOccurred(intensity: 0.75)
+                generator.prepare()
+            }
+        }
+    }
+
     private func cancelHold() {
+        let wasHolding = holdTask != nil
         holdTask?.cancel()
         holdTask = nil
+        hapticTask?.cancel()
+        hapticTask = nil
 
         guard !hasCompleted else { return }
+        if wasHolding {
+            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        }
         withAnimation(.easeOut(duration: 0.2)) {
             progress = 0
             isHolding = false
