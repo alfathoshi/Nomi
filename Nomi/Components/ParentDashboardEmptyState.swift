@@ -12,7 +12,6 @@ struct ParentDashboardEmptyState: View {
             emptyTopics
             emptyRecentActivity
         }
-        .padding(.bottom, 20)
     }
 
     private var emptyOverview: some View {

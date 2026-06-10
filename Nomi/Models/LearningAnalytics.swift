@@ -37,6 +37,14 @@ enum LearningAnalytics {
         )
     }
 
+    static func reset() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: activeTimeDateKey)
+        defaults.removeObject(forKey: activeTimeSecondsKey)
+        defaults.removeObject(forKey: correctAnswersKey)
+        defaults.removeObject(forKey: totalAnswersKey)
+    }
+
     static func addActiveTime(_ duration: TimeInterval, on date: Date) {
         guard duration > 0 else { return }
 
@@ -100,5 +108,10 @@ final class AppUsageTracker {
             on: endedAt
         )
         self.sessionStartedAt = nil
+    }
+
+    func reset() {
+        sessionStartedAt = nil
+        LearningAnalytics.reset()
     }
 }

@@ -72,7 +72,11 @@ struct ContentView: View {
                 }
             }
         case .main:
-            MainNavigationView()
+            MainNavigationView {
+                nextLaunchPhase = nil
+                isSplashVisible = true
+                launchPhase = .splash
+            }
         }
     }
 }
@@ -84,6 +88,8 @@ private enum LaunchPhase: Equatable {
 }
 
 private struct MainNavigationView: View {
+    let onLogout: () -> Void
+
     @State private var showRoadmap = false
     @State private var showParentZone = false
 
@@ -103,9 +109,12 @@ private struct MainNavigationView: View {
                 }
             }
             .navigationDestination(isPresented: $showParentZone) {
-                ParentZoneView {
-                    showParentZone = false
-                }
+                ParentZoneView(
+                    onExit: {
+                        showParentZone = false
+                    },
+                    onLogout: onLogout
+                )
             }
         }
     }

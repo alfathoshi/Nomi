@@ -23,6 +23,7 @@ struct NomiIntroductionView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
+                Spacer()
                 greeting
                     .padding(.horizontal, 28)
                     .padding(.top, 34)
