@@ -49,6 +49,7 @@ struct ParentDashboardView: View {
                         } else {
                             ParentDashboardEmptyState()
                         }
+                        appLinksSection
                         logoutButton
                     }
                     .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -255,6 +256,91 @@ struct ParentDashboardView: View {
         return accuracy.formatted(.percent.precision(.fractionLength(0)))
     }
 
+    private var appStoreReviewURL: URL {
+        URL(string: "https://apps.apple.com/app/id6777024337?action=write-review")!
+    }
+
+    private var privacyPolicyURL: URL {
+        URL(string: "https://alfathoshi.vercel.app/privacy/nomi")!
+    }
+
+    private var appLinksSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("About & Support")
+                .font(.heading3())
+
+            VStack(spacing: 0) {
+                Button {
+                    UIApplication.shared.open(appStoreReviewURL)
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color.nomiAccent)
+                            .frame(width: 32, height: 32)
+                            .background(Color.nomiAccentSoft.opacity(0.35))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                        Text("Rate Nomi on App Store")
+                            .font(.bodySmall(weight: .bold))
+                            .foregroundStyle(Color.nomiTextPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.nomiTextSecondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .tapSound()
+
+                Divider()
+                    .padding(.leading, 60)
+
+                Button {
+                    UIApplication.shared.open(privacyPolicyURL)
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "hand.raised.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color.nomiPrimary)
+                            .frame(width: 32, height: 32)
+                            .background(Color.nomiSurfaceTint)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                        Text("Privacy Policy")
+                            .font(.bodySmall(weight: .bold))
+                            .foregroundStyle(Color.nomiTextPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.nomiTextSecondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .tapSound()
+            }
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .shadow(
+                color: .black.opacity(0.06),
+                radius: 12,
+                x: 0,
+                y: 2
+            )
+        }
+        .padding(.top, 20)
+    }
+
     private var logoutButton: some View {
         WideButton(
             title: "Log Out & Reset Data",
@@ -327,6 +413,7 @@ private struct LogoutConfirmationDialog: View {
                         .background(Color.gray.opacity(0.12))
                         .clipShape(Capsule())
                         .buttonStyle(.plain)
+                        .tapSound()
 
                     Button(action: onConfirm) {
                         Label(
@@ -341,6 +428,7 @@ private struct LogoutConfirmationDialog: View {
                         .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
+                    .tapSound()
                 }
             }
             .padding(24)

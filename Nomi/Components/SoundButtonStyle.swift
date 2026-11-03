@@ -49,8 +49,31 @@ struct AudioMuteButton: View {
     }
 }
 
+#if canImport(UIKit)
 extension View {
-    func tapSound(_ name: String = "ClickButton", fileExtension: String = "m4a", volume: Float = 1.5) -> some View {
+    func tapSound(
+        _ name: String = "ClickButton",
+        fileExtension: String = "m4a",
+        volume: Float = 1.5,
+        haptic: UIImpactFeedbackGenerator.FeedbackStyle? = .light
+    ) -> some View {
+        self.simultaneousGesture(
+            TapGesture().onEnded {
+                SoundEffectsPlayer.shared.play(name, fileExtension: fileExtension, volume: volume)
+                if let style = haptic {
+                    UIImpactFeedbackGenerator(style: style).impactOccurred()
+                }
+            }
+        )
+    }
+}
+#else
+extension View {
+    func tapSound(
+        _ name: String = "ClickButton",
+        fileExtension: String = "m4a",
+        volume: Float = 1.5
+    ) -> some View {
         self.simultaneousGesture(
             TapGesture().onEnded {
                 SoundEffectsPlayer.shared.play(name, fileExtension: fileExtension, volume: volume)
@@ -58,3 +81,4 @@ extension View {
         )
     }
 }
+#endif

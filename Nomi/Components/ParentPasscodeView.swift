@@ -98,6 +98,7 @@ struct ParentPasscodeView: View {
                     .foregroundStyle(Color.nomiPrimary)
             }
             .buttonStyle(.plain)
+            .tapSound()
         }
         .navigationBarBackButtonHidden(true)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
